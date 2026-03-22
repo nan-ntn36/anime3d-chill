@@ -1,0 +1,122 @@
+# ============================================
+# Anime3D-Chill — Docker Compose (Development)
+# ============================================
+# Usage:
+#   docker-compose up         → Start all services
+#   docker-compose up -d      → Start in background
+#   docker-compose down       → Stop all services
+#   docker-compose down -v    → Stop + remove volumes
+# ============================================
+
+services:
+  # ── MySQL 8.0 ──────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: anime3d-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-anime3d_chill}
+      MYSQL_USER: ${DB_USER:-anime3d_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-anime3d_pass}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+  # ── Redis 7 ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: anime3d-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # ── Backend (Express) ──────────────────────
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: dev
+    container_name: anime3d-server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-anime3d_chill}
+      DB_USER: ${DB_USER:-anime3d_user}
+      DB_PASSWORD: ${DB_PASSWORD:-anime3d_pass}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-dev_access_secret_change_me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_me}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
+      CLIENT_URL: http://localhost:3000
+      NGUONC_API_URL: https://phim.nguonc.com/api
+      LOG_LEVEL: debug
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ── Frontend (Vite + React) ────────────────
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: dev
+    container_name: anime3d-client
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+# ── Volumes ────────────────────────────────────
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ── Networks ───────────────────────────────────
+networks:
+  app-network:
+    driver: bridge
