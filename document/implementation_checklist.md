@@ -1,62 +1,101 @@
 # 📋 Anime3D-Chill — Checklist Triển Khai
 
-> Dựa trên [implementation_plan.md](file:///d:/Workspace/reactJS_nextjs/product-manager/anime3d-chill/implementation_plan.md). Chia thành **5 giai đoạn**, ước lượng **~22 ngày làm việc**.
+> Dựa trên [implementation_plan.md](file:///d:/Workspace/reactJS_nextjs/product-manager/anime3d-chill/document/implementation_plan.md). Chia thành **5 giai đoạn**, ước lượng **~22 ngày làm việc**.
 
 ---
 
 ## 🎯 Mục Tiêu Tiên Quyết — Quy Tắc Documentation
 
 > [!CAUTION]
-> **BẮT BUỘC**: Sau khi hoàn thành mỗi task/module, **phải tạo tài liệu** và lưu vào folder `document/`. Task **chưa được coi là hoàn thành** nếu chưa có document đi kèm.
+> **BẮT BUỘC**: Sau khi hoàn thành mỗi task/module, **phải tạo 2 file tài liệu** và lưu vào folder `document/`. Task **chưa được coi là hoàn thành** nếu chưa có cả 2 document đi kèm.
 
-### Quy tắc
+### Quy tắc — Mỗi ngày/module phải có 2 file
 
-1. **Mỗi ngày/module hoàn thành** → tạo file [.md](file:///d:/Workspace/reactJS_nextjs/product-manager/anime3d-chill/implementation_plan.md) tương ứng trong `document/`
-2. **Nội dung document bắt buộc**:
-   - 📝 **Giải thích code**: mục đích, logic chính, cách hoạt động của từng file/function quan trọng
-   - 🚀 **Hướng dẫn triển khai**: các bước setup, cài đặt, config để chạy module đó
-   - 🔗 **Mối liên hệ**: module này kết nối/phụ thuộc với module nào khác
-   - ⚠️ **Lưu ý quan trọng**: edge cases, gotchas, quyết định thiết kế đáng chú ý
+#### 📘 File 1: Hướng dẫn chạy (`dayXX-<tên>-run.md`)
+
+Dành cho **người mới** muốn chạy được code nhanh nhất:
+
+- ✅ **Yêu cầu phần mềm** (prerequisites): phiên bản Node.js, Docker, npm, v.v.
+- ✅ **Từng bước chạy** (step-by-step): clone repo → install → config → start
+- ✅ **Chạy Local** vs **Chạy Docker**: hướng dẫn riêng cho cả 2 cách
+- ✅ **Kiểm tra kết quả**: URL nào mở được, curl lệnh gì, output mong đợi
+- ✅ **Troubleshooting**: các lỗi thường gặp + cách khắc phục
+- ✅ **Biến môi trường**: giải thích ý nghĩa từng biến trong `.env`
+
+#### 📗 File 2: Giải thích triển khai code (`dayXX-<tên>-code.md`)
+
+Dành cho **developer** muốn hiểu code hoạt động thế nào:
+
+- ✅ **Kiến trúc tổng quan**: sơ đồ (mermaid) các service/module liên kết
+- ✅ **Giải thích từng file**: mục đích, logic chính, các function quan trọng
+- ✅ **Quyết định thiết kế**: TẠI SAO chọn giải pháp này (ví dụ: tại sao dùng `legacy-peer-deps`)
+- ✅ **Mối liên hệ**: module này phụ thuộc/kết nối với module nào
+- ✅ **Lưu ý quan trọng**: edge cases, gotchas, breaking changes
+- ✅ **Ví dụ code**: snippet minh họa cách sử dụng/mở rộng
 
 ### Cấu trúc folder `document/`
 
 ```
 document/
+├── implementation_plan.md              # Plan tổng thể
+├── implementation_checklist.md         # Checklist này
 ├── phase-1/
-│   ├── day01-monorepo-docker.md
-│   ├── day02-backend-foundation.md
-│   ├── day03-database-auth.md
-│   └── day04-frontend-foundation.md
+│   ├── day01-monorepo-docker-run.md    # Hướng dẫn chạy
+│   ├── day01-monorepo-docker-code.md   # Giải thích code
+│   ├── day02-backend-foundation-run.md
+│   ├── day02-backend-foundation-code.md
+│   ├── day03-database-auth-run.md
+│   ├── day03-database-auth-code.md
+│   ├── day04-frontend-foundation-run.md
+│   └── day04-frontend-foundation-code.md
 ├── phase-2/
-│   ├── day05-movie-proxy-cache.md
-│   ├── day06-movie-routes.md
-│   ├── day07-homepage-components.md
-│   └── day08-banner-3d.md
+│   ├── day05-movie-proxy-cache-run.md
+│   ├── day05-movie-proxy-cache-code.md
+│   ├── day06-movie-routes-run.md
+│   ├── day06-movie-routes-code.md
+│   ├── day07-homepage-components-run.md
+│   ├── day07-homepage-components-code.md
+│   ├── day08-banner-3d-run.md
+│   └── day08-banner-3d-code.md
 ├── phase-3/
-│   ├── day09-movie-detail.md
-│   ├── day10-11-video-player.md
-│   ├── day12-watch-progress.md
-│   ├── day13-favorites-history.md
-│   └── day14-search.md
+│   ├── day09-movie-detail-run.md
+│   ├── day09-movie-detail-code.md
+│   ├── day10-11-video-player-run.md
+│   ├── day10-11-video-player-code.md
+│   ├── day12-watch-progress-run.md
+│   ├── day12-watch-progress-code.md
+│   ├── day13-favorites-history-run.md
+│   ├── day13-favorites-history-code.md
+│   ├── day14-search-run.md
+│   └── day14-search-code.md
 ├── phase-4/
-│   ├── day15-admin-dashboard.md
-│   ├── day16-profile-continue-watching.md
-│   ├── day17-analytics-trending.md
-│   └── day18-seo-accessibility.md
+│   ├── day15-admin-dashboard-run.md
+│   ├── day15-admin-dashboard-code.md
+│   ├── day16-profile-continue-watching-run.md
+│   ├── day16-profile-continue-watching-code.md
+│   ├── day17-analytics-trending-run.md
+│   ├── day17-analytics-trending-code.md
+│   ├── day18-seo-accessibility-run.md
+│   └── day18-seo-accessibility-code.md
 └── phase-5/
-    ├── day19-testing.md
-    ├── day20-e2e-performance.md
-    ├── day21-cdn-flags-security.md
-    └── day22-docker-deploy.md
+    ├── day19-testing-run.md
+    ├── day19-testing-code.md
+    ├── day20-e2e-performance-run.md
+    ├── day20-e2e-performance-code.md
+    ├── day21-cdn-flags-security-run.md
+    ├── day21-cdn-flags-security-code.md
+    ├── day22-docker-deploy-run.md
+    └── day22-docker-deploy-code.md
 ```
 
 ### Checklist documentation mỗi ngày
 
 Thêm vào cuối mỗi ngày làm việc:
 
-- [ ] ✏️ Tạo document giải thích code + hướng dẫn triển khai cho ngày hôm đó
-- [ ] 📂 Lưu vào `document/phase-X/dayXX-<tên-module>.md`
-- [ ] ✅ Review lại document đảm bảo đủ 4 mục bắt buộc
+- [ ] 📘 Tạo file **hướng dẫn chạy** (`dayXX-<tên>-run.md`) — đủ chi tiết để người mới follow được
+- [ ] 📗 Tạo file **giải thích code** (`dayXX-<tên>-code.md`) — đủ chi tiết để developer hiểu
+- [ ] 📂 Lưu vào `document/phase-X/`
+- [ ] ✅ Review lại 2 documents đảm bảo đầy đủ nội dung bắt buộc
 
 ---
 
