@@ -241,23 +241,23 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 7 · Frontend — Trang Chủ & Movie Components
 
 **Module: UI Components**
-- [ ] `src/components/ui/Skeleton.jsx` — loading skeleton
-- [ ] `src/components/ui/Pagination.jsx` — phân trang
-- [ ] `src/components/ui/SearchBar.jsx` — ô tìm kiếm
-- [ ] `src/components/movie/MovieCard.jsx` + `.css` — card phim (poster, title, year, quality)
-- [ ] `src/components/movie/MovieGrid.jsx` — grid responsive
+- [x] `src/components/ui/Skeleton.jsx` — loading skeleton
+- [x] `src/components/ui/Pagination.jsx` — phân trang
+- [x] `src/components/ui/SearchBar.jsx` — ô tìm kiếm
+- [x] `src/components/movie/MovieCard.jsx` + `.css` — card phim (poster, title, year, quality)
+- [x] `src/components/movie/MovieGrid.jsx` — grid responsive
 
 **Module: Movie Hooks**
-- [ ] `src/hooks/useMovies.js`:
-  - [ ] `useNewMovies(page)` — TanStack Query
-  - [ ] `useMovieDetail(slug)` — TanStack Query
-  - [ ] `useMoviesByGenre(slug, page)`
-  - [ ] `useSearchMovies(keyword, page)`
+- [x] `src/hooks/useMovies.js`:
+  - [x] `useNewMovies(page)` — TanStack Query
+  - [x] `useMovieDetail(slug)` — TanStack Query
+  - [x] `useMoviesByGenre(slug, page)`
+  - [x] `useSearchMovies(keyword, page)`
 
 **Module: Trang Chủ**
-- [ ] `src/pages/HomePage.jsx` — layout sections: phim mới, phim bộ, phim lẻ
-- [ ] `src/components/movie/MovieCarousel.jsx` — Swiper slider nổi bật
-- [ ] Fallback UI: component `ErrorFallback` với nút Thử lại
+- [x] `src/pages/HomePage.jsx` — layout sections: phim mới, phim bộ, phim lẻ
+- [x] `src/components/movie/MovieCarousel.jsx` — Swiper slider nổi bật
+- [x] Fallback UI: component `ErrorFallback` với nút Thử lại
 
 ---
 

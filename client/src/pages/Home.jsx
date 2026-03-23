@@ -1,9 +1,20 @@
-import { Helmet } from 'react-helmet-async';
-
 /**
- * Home — Trang chủ (placeholder cho Day 5+)
+ * HomePage — Trang chủ: phim mới, phim bộ, phim lẻ, thể loại
+ * Dữ liệu thật từ API qua TanStack Query hooks
  */
+
+import { Helmet } from 'react-helmet-async';
+import MovieCarousel from '@components/movie/MovieCarousel';
+import ErrorFallback from '@components/common/ErrorFallback';
+import { useNewMovies, useMoviesByList, useMoviesByGenre } from '@/hooks/useMovies';
+import './Home.css';
+
 export default function Home() {
+  const newMovies = useNewMovies(1);
+  const phimBo = useMoviesByList('phim-bo', 1);
+  const phimLe = useMoviesByList('phim-le', 1);
+  const hanhDong = useMoviesByGenre('hanh-dong', 1);
+
   return (
     <>
       <Helmet>
@@ -11,28 +22,81 @@ export default function Home() {
         <meta name="description" content="Xem phim anime miễn phí với giao diện 3D hiện đại. Cập nhật phim mới mỗi ngày." />
       </Helmet>
 
-      <section className="container" style={{ padding: 'var(--space-8) var(--space-4)' }}>
-        <h1 className="animate-slideUp">
-          Chào mừng đến <span className="text-gradient">Anime3D-Chill</span>
-        </h1>
-        <p style={{ color: 'var(--color-text-secondary)', marginTop: 'var(--space-4)', maxWidth: '600px' }}>
-          Website xem phim anime với giao diện 3D hiện đại. Đang trong quá trình xây dựng...
-        </p>
+      <div className="home container">
+        {/* Hero Section */}
+        <section className="home__hero animate-slideUp">
+          <h1>
+            Chào mừng đến <span className="text-gradient">Anime3D-Chill</span>
+          </h1>
+          <p className="home__subtitle">
+            Xem phim anime với giao diện hiện đại. Cập nhật mỗi ngày.
+          </p>
+        </section>
 
-        {/* Placeholder cards */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: 'var(--space-4)',
-          marginTop: 'var(--space-8)',
-        }}>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="card" style={{ aspectRatio: '2/3' }}>
-              <div className="skeleton" style={{ width: '100%', height: '100%' }} />
-            </div>
-          ))}
-        </div>
-      </section>
+        {/* Phim Mới */}
+        <section className="home__section">
+          {newMovies.isError ? (
+            <ErrorFallback
+              message="Không thể tải phim mới"
+              onRetry={() => newMovies.refetch()}
+            />
+          ) : (
+            <MovieCarousel
+              title="🔥 Phim Mới Cập Nhật"
+              movies={newMovies.data?.items || []}
+              loading={newMovies.isLoading}
+            />
+          )}
+        </section>
+
+        {/* Phim Bộ */}
+        <section className="home__section">
+          {phimBo.isError ? (
+            <ErrorFallback
+              message="Không thể tải phim bộ"
+              onRetry={() => phimBo.refetch()}
+            />
+          ) : (
+            <MovieCarousel
+              title="📺 Phim Bộ"
+              movies={phimBo.data?.items || []}
+              loading={phimBo.isLoading}
+            />
+          )}
+        </section>
+
+        {/* Phim Lẻ */}
+        <section className="home__section">
+          {phimLe.isError ? (
+            <ErrorFallback
+              message="Không thể tải phim lẻ"
+              onRetry={() => phimLe.refetch()}
+            />
+          ) : (
+            <MovieCarousel
+              title="🎬 Phim Lẻ"
+              movies={phimLe.data?.items || []}
+              loading={phimLe.isLoading}
+            />
+          )}
+        </section>
+
+        {/* Hành Động — thể loại khác biệt, tránh trùng với Phim Bộ */}
+        <section className="home__section">
+          {hanhDong.isError ? (
+            <ErrorFallback
+              message="Không thể tải phim hành động"
+              onRetry={() => hanhDong.refetch()}
+            />
+          ) : (
+            <MovieCarousel
+              title="💥 Hành Động"
+              movies={hanhDong.data?.items || []}
+              loading={hanhDong.isLoading}
+            />
+          )}
+        </section>
+      </div>
     </>
   );
 }

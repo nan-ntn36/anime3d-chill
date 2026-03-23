@@ -1,0 +1,19 @@
+.error-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-12) var(--space-4);
+  text-align: center;
+}
+
+.error-fallback__icon {
+  font-size: 3rem;
+}
+
+.error-fallback__message {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  max-width: 400px;
+}

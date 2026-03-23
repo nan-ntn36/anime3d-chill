@@ -99,6 +99,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
+      VITE_API_URL: http://anime3d-server:5000
     ports:
       - "3000:3000"
     volumes:
