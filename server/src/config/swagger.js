@@ -13,8 +13,8 @@ const options = {
     },
     servers: [
       {
-        url: '/api/v1',
-        description: 'API v1',
+        url: '/',
+        description: 'Server root',
       },
     ],
     components: {

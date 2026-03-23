@@ -1,3 +1,8 @@
+/**
+ * Anime3D-Chill Backend Server
+ * Express application entry point
+ */
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -5,21 +10,55 @@ const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
-// Load environment variables
-require('dotenv').config();
+// ── Config ──────────────────────────────────────────────────
+const env = require('./config/env');
+const { sequelize, connectDatabase } = require('./config/database');
+const { connectRedis, getRedisStatus } = require('./config/redis');
+
+// ── Utils ───────────────────────────────────────────────────
+const logger = require('./utils/logger');
+const { sendSuccess } = require('./utils/response');
+
+// ── Middleware ───────────────────────────────────────────────
+const requestId = require('./middleware/requestId');
+const { generalLimiter } = require('./middleware/rateLimiter');
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // ── Core Middleware ─────────────────────────────────────────
+app.use(requestId);                   // UUID per request
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: env.clientUrl,
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(generalLimiter);              // Rate limit: 100 req / 15min
+
+// ── Request Logging (Pino) ──────────────────────────────────
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const logData = {
+      requestId: req.id,
+      method: req.method,
+      url: req.originalUrl,
+      statusCode: res.statusCode,
+      duration: `${duration}ms`,
+    };
+
+    if (res.statusCode >= 400) {
+      logger.warn(logData, `${req.method} ${req.originalUrl} ${res.statusCode}`);
+    } else {
+      logger.info(logData, `${req.method} ${req.originalUrl} ${res.statusCode}`);
+    }
+  });
+  next();
+});
 
 // ── Swagger API Docs ────────────────────────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -36,7 +75,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   },
 }));
 
-// Serve raw swagger JSON
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
@@ -46,130 +84,105 @@ app.get('/api-docs.json', (req, res) => {
 
 /**
  * @swagger
- * /health:
+ * /api/v1/health:
  *   get:
  *     tags: [Health]
  *     summary: Kiểm tra sức khỏe server
- *     description: Trả về trạng thái hoạt động, uptime và environment
+ *     description: Trả về trạng thái hoạt động, uptime, DB và Redis connection
  *     responses:
  *       200:
  *         description: Server hoạt động bình thường
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     status:
- *                       type: string
- *                       example: ok
- *                     uptime:
- *                       type: number
- *                       example: 123.45
- *                     timestamp:
- *                       type: string
- *                       format: date-time
- *                     environment:
- *                       type: string
- *                       example: development
  */
-app.get('/api/v1/health', (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      status: 'ok',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
+app.get('/api/v1/health', async (req, res) => {
+  let dbStatus = 'disconnected';
+  try {
+    await sequelize.authenticate();
+    dbStatus = 'connected';
+  } catch {
+    dbStatus = 'disconnected';
+  }
+
+  const redisStatus = getRedisStatus() ? 'connected' : 'disconnected';
+
+  sendSuccess(res, {
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    environment: env.nodeEnv,
+    services: {
+      database: dbStatus,
+      redis: redisStatus,
     },
   });
 });
 
 /**
  * @swagger
- * /ready:
+ * /api/v1/ready:
  *   get:
  *     tags: [Health]
  *     summary: Kiểm tra sẵn sàng phục vụ
  *     description: Kiểm tra kết nối tới Database và Redis
  *     responses:
  *       200:
- *         description: Trạng thái sẵn sàng của các services
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: object
- *                   properties:
- *                     status:
- *                       type: string
- *                       example: ready
- *                     services:
- *                       type: object
- *                       properties:
- *                         database:
- *                           type: string
- *                           example: connected
- *                         redis:
- *                           type: string
- *                           example: connected
+ *         description: Tất cả services sẵn sàng
+ *       503:
+ *         description: Một hoặc nhiều services chưa sẵn sàng
  */
-app.get('/api/v1/ready', (req, res) => {
-  // TODO: Check DB and Redis connections
-  res.json({
-    success: true,
-    data: {
-      status: 'ready',
-      services: {
-        database: 'not_configured',
-        redis: 'not_configured',
-      },
+app.get('/api/v1/ready', async (req, res) => {
+  let dbReady = false;
+  try {
+    await sequelize.authenticate();
+    dbReady = true;
+  } catch {
+    dbReady = false;
+  }
+
+  const redisReady = getRedisStatus();
+  const allReady = dbReady && redisReady;
+
+  const statusCode = allReady ? 200 : 503;
+  const data = {
+    status: allReady ? 'ready' : 'not_ready',
+    services: {
+      database: dbReady ? 'connected' : 'disconnected',
+      redis: redisReady ? 'connected' : 'disconnected',
     },
-  });
+  };
+
+  return res.status(statusCode).json({ success: allReady, data });
 });
 
-// ── 404 Handler ─────────────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `Route ${req.method} ${req.originalUrl} not found`,
-    code: 'RESOURCE_NOT_FOUND',
-  });
-});
-
-// ── Error Handler ───────────────────────────────────────────
-app.use((err, req, res, _next) => {
-  const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production'
-    ? 'Internal server error'
-    : err.message;
-
-  console.error(`[ERROR] ${err.message}`, err.stack);
-
-  res.status(statusCode).json({
-    success: false,
-    message,
-    code: err.code || 'INTERNAL_ERROR',
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
-  });
-});
+// ── 404 + Error Handler ─────────────────────────────────────
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // ── Start Server ────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📋 Health: http://localhost:${PORT}/api/v1/health`);
-  console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+async function startServer() {
+  // Connect to Database
+  const dbConnected = await connectDatabase();
+  if (!dbConnected) {
+    logger.warn('⚠️ Server starting without database connection');
+  }
+
+  // Connect to Redis
+  const redisConnected = await connectRedis();
+  if (!redisConnected) {
+    logger.warn('⚠️ Server starting without Redis (using memory cache fallback)');
+  }
+
+  // Start listening
+  app.listen(env.port, () => {
+    logger.info(`🚀 Server running on http://localhost:${env.port}`);
+    logger.info(`📋 Health: http://localhost:${env.port}/api/v1/health`);
+    logger.info(`📚 API Docs: http://localhost:${env.port}/api-docs`);
+    logger.info(`🌍 Environment: ${env.nodeEnv}`);
+  });
+}
+
+startServer().catch((err) => {
+  logger.fatal({ err }, '💀 Failed to start server');
+  process.exit(1);
 });
 
 module.exports = app;

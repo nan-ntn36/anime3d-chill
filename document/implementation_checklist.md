@@ -120,23 +120,23 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 2 · Backend Foundation
 
 **Module: Server Config**
-- [ ] Init `server/package.json` + cài dependencies (Express, Sequelize, ioredis, Pino, v.v.)
-- [ ] `src/config/env.js` — load biến môi trường + validation
-- [ ] `src/config/database.js` — kết nối Sequelize → MySQL
-- [ ] `src/config/redis.js` — kết nối ioredis + fallback `node-cache`
-- [ ] `server/.env.example` với tất cả biến cần thiết
+- [x] Init `server/package.json` + cài dependencies (Express, Sequelize, ioredis, Pino, v.v.)
+- [x] `src/config/env.js` — load biến môi trường + validation
+- [x] `src/config/database.js` — kết nối Sequelize → MySQL
+- [x] `src/config/redis.js` — kết nối ioredis + fallback `node-cache`
+- [x] `server/.env.example` với tất cả biến cần thiết
 
 **Module: Middleware Stack**
-- [ ] `src/middleware/requestId.js` — gắn UUID cho mỗi request
-- [ ] `src/middleware/rateLimiter.js` — rate limit theo IP/User (Redis store)
-- [ ] `src/middleware/errorHandler.js` — xử lý lỗi tập trung
-- [ ] `src/middleware/validate.js` — wrapper cho express-validator
-- [ ] Setup Helmet, CORS, cookie-parser trong `src/index.js`
+- [x] `src/middleware/requestId.js` — gắn UUID cho mỗi request
+- [x] `src/middleware/rateLimiter.js` — rate limit theo IP/User (Redis store)
+- [x] `src/middleware/errorHandler.js` — xử lý lỗi tập trung
+- [x] `src/middleware/validate.js` — wrapper cho express-validator
+- [x] Setup Helmet, CORS, cookie-parser trong `src/index.js`
 
 **Module: Logging**
-- [ ] `src/utils/logger.js` — Pino logger (JSON structured)
-- [ ] `src/utils/response.js` — helper format response chuẩn (`success/error`)
-- [ ] Endpoint `GET /api/v1/health` + `GET /api/v1/ready`
+- [x] `src/utils/logger.js` — Pino logger (JSON structured)
+- [x] `src/utils/response.js` — helper format response chuẩn (`success/error`)
+- [x] Endpoint `GET /api/v1/health` + `GET /api/v1/ready`
 
 ---
 
