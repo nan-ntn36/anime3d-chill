@@ -12,7 +12,7 @@ const { sendError } = require('../utils/response');
  */
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,     // 15 phút
-  max: 100,
+  max: 10000,
   standardHeaders: true,         // RateLimit-* headers
   legacyHeaders: false,
   handler: (req, res) => {

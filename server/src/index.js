@@ -24,6 +24,14 @@ const requestId = require('./middleware/requestId');
 const { generalLimiter } = require('./middleware/rateLimiter');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
+// ── Routes ──────────────────────────────────────────────────
+const v1Router = require('./routes/v1');
+
+// ── Models ──────────────────────────────────────────────────
+const { syncModels } = require('./models');
+const { seedUsers } = require('./seeders/initialUsers');
+const { User } = require('./models');
+
 const app = express();
 
 // ── Core Middleware ─────────────────────────────────────────
@@ -36,7 +44,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(generalLimiter);              // Rate limit: 100 req / 15min
+// app.use(generalLimiter);              // Rate limit: 100 req / 15min
 
 // ── Request Logging (Pino) ──────────────────────────────────
 app.use((req, res, next) => {
@@ -153,6 +161,9 @@ app.get('/api/v1/ready', async (req, res) => {
   return res.status(statusCode).json({ success: allReady, data });
 });
 
+// ── API Routes ──────────────────────────────────────────────
+app.use('/api/v1', v1Router);
+
 // ── 404 + Error Handler ─────────────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -163,6 +174,14 @@ async function startServer() {
   const dbConnected = await connectDatabase();
   if (!dbConnected) {
     logger.warn('⚠️ Server starting without database connection');
+  }
+
+  // Sync models + seed (dev only)
+  if (dbConnected) {
+    await syncModels({ alter: env.isDev });
+    if (env.isDev) {
+      await seedUsers(User);
+    }
   }
 
   // Connect to Redis
