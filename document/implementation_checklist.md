@@ -143,25 +143,25 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 3 · Database Models & Auth Backend
 
 **Module: Models (Sequelize)**
-- [ ] `src/models/User.js` — users table + hooks (hash password)
-- [ ] `src/models/RefreshToken.js` — refresh_tokens table
-- [ ] `src/models/Favorite.js` — favorites table
-- [ ] `src/models/WatchHistory.js` — watch_history table
-- [ ] `src/models/MovieView.js` — movie_views table (analytics)
-- [ ] `src/models/index.js` — associations + sync
-- [ ] Tạo Sequelize migrations cho tất cả bảng
-- [ ] Tạo seeders: admin account, test users
+- [x] `src/models/User.js` — users table + hooks (hash password)
+- [x] `src/models/RefreshToken.js` — refresh_tokens table
+- [x] `src/models/Favorite.js` — favorites table
+- [x] `src/models/WatchHistory.js` — watch_history table
+- [x] `src/models/MovieView.js` — movie_views table (analytics)
+- [x] `src/models/index.js` — associations + sync
+- [x] Tạo Sequelize migrations cho tất cả bảng
+- [x] Tạo seeders: admin account, test users
 
 **Module: Auth (JWT)**
-- [ ] `src/utils/jwt.js` — tạo/xác minh access + refresh token
-- [ ] `src/middleware/auth.js` — xác thực JWT middleware
-- [ ] `src/middleware/authorize.js` — phân quyền theo role
-- [ ] `src/validators/authValidators.js` — rules cho register/login
-- [ ] `src/controllers/authController.js` — register, login, refresh, logout, logout-all, me
-- [ ] `src/routes/v1/authRoutes.js` — mount tất cả auth endpoints
-- [ ] Token rotation logic (vô hiệu token cũ khi refresh)
-- [ ] Cookie HttpOnly cho refresh token
-- [ ] Khóa tài khoản sau 10 lần login thất bại
+- [x] `src/utils/jwt.js` — tạo/xác minh access + refresh token
+- [x] `src/middleware/auth.js` — xác thực JWT middleware
+- [x] `src/middleware/authorize.js` — phân quyền theo role
+- [x] `src/validators/authValidators.js` — rules cho register/login
+- [x] `src/controllers/authController.js` — register, login, refresh, logout, logout-all, me
+- [x] `src/routes/v1/authRoutes.js` — mount tất cả auth endpoints
+- [x] Token rotation logic (vô hiệu token cũ khi refresh)
+- [x] Cookie HttpOnly cho refresh token
+- [x] Khóa tài khoản sau 10 lần login thất bại
 
 ---
 
