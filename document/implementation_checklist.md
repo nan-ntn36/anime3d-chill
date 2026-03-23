@@ -168,33 +168,33 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 4 · Frontend Foundation
 
 **Module: Client Setup**
-- [ ] Init Vite + React project (`client/package.json`)
-- [ ] Cài tất cả frontend dependencies
-- [ ] `vite.config.js` — proxy API, alias paths
-- [ ] `src/index.css` — hệ thống thiết kế (CSS variables, dark theme, typography)
+- [x] Init Vite + React project (`client/package.json`)
+- [x] Cài tất cả frontend dependencies
+- [x] `vite.config.js` — proxy API, alias paths
+- [x] `src/index.css` — hệ thống thiết kế (CSS variables, dark theme, typography)
 
 **Module: Routing & Layout**
-- [ ] `src/App.jsx` — React Router DOM setup, code split lazy routes
-- [ ] `src/main.jsx` — QueryClientProvider, ErrorBoundary, HelmetProvider
-- [ ] `src/components/layout/Header.jsx` + `.css` — navigation, responsive
-- [ ] `src/components/layout/Footer.jsx` + `.css`
-- [ ] `src/components/layout/AppLayout.jsx` — wrapper layout
-- [ ] `src/components/common/ErrorBoundary.jsx` — class component
+- [x] `src/App.jsx` — React Router DOM setup, code split lazy routes
+- [x] `src/main.jsx` — QueryClientProvider, ErrorBoundary, HelmetProvider
+- [x] `src/components/layout/Header.jsx` + `.css` — navigation, responsive
+- [x] `src/components/layout/Footer.jsx` + `.css`
+- [x] `src/components/layout/AppLayout.jsx` — wrapper layout
+- [x] `src/components/common/ErrorBoundary.jsx` — class component
 
 **Module: API Layer**
-- [ ] `src/api/axiosConfig.js` — base URL, interceptors, auto refresh token
-- [ ] `src/api/authApi.js` — register, login, refresh, logout, getMe
-- [ ] `src/api/movieApi.js` — getNew, getDetail, search, getByGenre, v.v.
-- [ ] `src/api/userApi.js` — updateProfile, getFavorites, getHistory
+- [x] `src/api/axiosConfig.js` — base URL, interceptors, auto refresh token
+- [x] `src/api/authApi.js` — register, login, refresh, logout, getMe
+- [x] `src/api/movieApi.js` — getNew, getDetail, search, getByGenre, v.v.
+- [x] `src/api/userApi.js` — updateProfile, getFavorites, getHistory
 
 **Module: State Management**
-- [ ] `src/store/authStore.js` — Zustand: user, token, login/logout actions
-- [ ] `src/store/playerStore.js` — Zustand: playing, volume, episode, v.v.
-- [ ] `src/store/uiStore.js` — Zustand: sidebar, modal, theme
+- [x] `src/store/authStore.js` — Zustand: user, token, login/logout actions
+- [x] `src/store/playerStore.js` — Zustand: playing, volume, episode, v.v.
+- [x] `src/store/uiStore.js` — Zustand: sidebar, modal, theme
 
 **Module: Cron Jobs**
-- [ ] `src/jobs/cleanExpiredTokens.js` — xóa refresh token hết hạn (daily 3AM)
-- [ ] `src/jobs/index.js` — đăng ký tất cả cron jobs
+- [x] `server/src/jobs/cleanExpiredTokens.js` — xóa refresh token hết hạn (daily 3AM)
+- [x] `server/src/jobs/index.js` — đăng ký tất cả cron jobs
 
 ---
 
@@ -203,38 +203,38 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 5 · Movie Proxy + Cache Backend
 
 **Module: nguonc Service**
-- [ ] `src/services/nguoncService.js` — proxy gọi API phim.nguonc.com
-- [ ] Implement cache-first strategy (Redis → API → save cache)
-- [ ] Implement retry (2 lần, exponential backoff)
-- [ ] Implement circuit breaker (5 fails → ngắt 60s)
-- [ ] Stale-while-revalidate logic
-- [ ] Fallback khi Redis down → `node-cache` in-memory
+- [x] `src/services/nguoncService.js` — proxy gọi API phim.nguonc.com
+- [x] Implement cache-first strategy (Redis → API → save cache)
+- [x] Implement retry (2 lần, exponential backoff)
+- [x] Implement circuit breaker (5 fails → ngắt 60s)
+- [x] Stale-while-revalidate logic
+- [x] Fallback khi Redis down → `node-cache` in-memory
 
 **Module: Data Transformer**
-- [ ] `src/services/nguoncTransformer.js`
-  - [ ] `transformMovieListResponse()` → `{ items, pagination }`
-  - [ ] `transformMovieDetailResponse()` → normalized detail
-  - [ ] `transformEpisodeResponse()` → normalized episodes
+- [x] `src/services/nguoncTransformer.js`
+  - [x] `transformMovieListResponse()` → `{ items, pagination }`
+  - [x] `transformMovieDetailResponse()` → normalized detail
+  - [x] `transformEpisodeResponse()` → normalized episodes
 
 **Module: Cache Helper**
-- [ ] `src/utils/cache.js` — get/set/del/flush helpers cho Redis
+- [x] `src/utils/cache.js` — get/set/del/flush helpers cho Redis
 
 ---
 
 ### Ngày 6 · Movie Routes Backend + Validators
 
 **Module: Movie API**
-- [ ] `src/validators/movieValidators.js` — validate slug, page, keyword
-- [ ] `src/controllers/movieController.js`:
-  - [ ] `getNewMovies` — phim mới (?page)
-  - [ ] `getMoviesByList` — danh sách theo slug (?page)
-  - [ ] `getMovieDetail` — chi tiết theo slug
-  - [ ] `getByGenre` — theo thể loại
-  - [ ] `getByCountry` — theo quốc gia
-  - [ ] `getByYear` — theo năm
-  - [ ] `searchMovies` — tìm kiếm (?keyword)
-- [ ] `src/routes/v1/movieRoutes.js` — mount routes
-- [ ] `src/routes/v1/index.js` — tổng hợp auth + movie routes
+- [x] `src/validators/movieValidators.js` — validate slug, page, keyword
+- [x] `src/controllers/movieController.js`:
+  - [x] `getNewMovies` — phim mới (?page)
+  - [x] `getMoviesByList` — danh sách theo slug (?page)
+  - [x] `getMovieDetail` — chi tiết theo slug
+  - [x] `getByGenre` — theo thể loại
+  - [x] `getByCountry` — theo quốc gia
+  - [x] `getByYear` — theo năm
+  - [x] `searchMovies` — tìm kiếm (?keyword)
+- [x] `src/routes/v1/movieRoutes.js` — mount routes
+- [x] `src/routes/v1/index.js` — tổng hợp auth + movie routes
 
 ---
 

@@ -32,6 +32,9 @@ const { syncModels } = require('./models');
 const { seedUsers } = require('./seeders/initialUsers');
 const { User } = require('./models');
 
+// ── Jobs ────────────────────────────────────────────────────
+const { startJobs } = require('./jobs');
+
 const app = express();
 
 // ── Core Middleware ─────────────────────────────────────────
@@ -188,6 +191,11 @@ async function startServer() {
   const redisConnected = await connectRedis();
   if (!redisConnected) {
     logger.warn('⚠️ Server starting without Redis (using memory cache fallback)');
+  }
+
+  // Start cron jobs
+  if (dbConnected) {
+    startJobs();
   }
 
   // Start listening
