@@ -3,19 +3,36 @@
  * Shows featured movies with poster background, metadata, and thumbnail nav
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiInfo } from 'react-icons/fi';
 import { SkeletonCard } from '@components/ui/Skeleton';
 import './HeroBanner.css';
 
 const AUTO_ROTATE_MS = 6000;
+const PARTICLE_COUNT = 20;
+
+/** Generate CSS particle data once */
+function generateParticles(count) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${100 + Math.random() * 20}%`,
+    size: 2 + Math.random() * 3,
+    delay: Math.random() * 15,
+    duration: 10 + Math.random() * 15,
+    opacity: 0.15 + Math.random() * 0.35,
+  }));
+}
 
 export default function HeroBanner({ movies = [], loading = false }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
   const progressRef = useRef(null);
+
+  // CSS particles (memoized)
+  const particles = useMemo(() => generateParticles(PARTICLE_COUNT), []);
 
   // Limit to first 8 movies
   const slides = movies.slice(0, 8);
@@ -71,6 +88,25 @@ export default function HeroBanner({ movies = [], loading = false }) {
 
   return (
     <div className="hero-banner">
+      {/* CSS Particles */}
+      <div className="hero-banner__particles">
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="hero-banner__particle"
+            style={{
+              left: p.left,
+              top: p.top,
+              width: p.size,
+              height: p.size,
+              animationDelay: `${p.delay}s`,
+              animationDuration: `${p.duration}s`,
+              opacity: p.opacity,
+            }}
+          />
+        ))}
+      </div>
+
       {slides.map((movie, index) => {
         const bgImage = movie.poster || movie.thumb || '';
         return (
