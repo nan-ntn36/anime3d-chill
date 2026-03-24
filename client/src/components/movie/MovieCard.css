@@ -112,6 +112,8 @@
 /* Info */
 .movie-card__info {
   padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
 }
 
 .movie-card__title {
@@ -124,6 +126,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: var(--space-1);
+  min-height: 2.6em; /* always reserve space for 2 lines */
 }
 
 .movie-card__meta {

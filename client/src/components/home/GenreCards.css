@@ -1,0 +1,124 @@
+/* ══════════════════════════════════════════════════════════
+   GenreCards — "Bạn đang quan tâm gì?" section
+   ══════════════════════════════════════════════════════════ */
+
+.genre-cards {
+  padding: var(--space-8) 0;
+}
+
+.genre-cards__title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--space-6);
+}
+
+.genre-cards__grid {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-bottom: var(--space-2);
+}
+
+.genre-cards__grid::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-cards__card {
+  flex: 0 0 180px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-4);
+  min-height: 120px;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.genre-cards__card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  color: white;
+}
+
+.genre-cards__card-name {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.genre-cards__card-link {
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+/* Gradient backgrounds for each card */
+.genre-cards__card:nth-child(1) {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+}
+.genre-cards__card:nth-child(2) {
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+}
+.genre-cards__card:nth-child(3) {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+.genre-cards__card:nth-child(4) {
+  background: linear-gradient(135deg, #c084fc 0%, #9333ea 100%);
+}
+.genre-cards__card:nth-child(5) {
+  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+}
+.genre-cards__card:nth-child(6) {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+
+/* "More" card */
+.genre-cards__card--more {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%) !important;
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+}
+
+.genre-cards__card--more:hover {
+  border-color: var(--color-border-hover);
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%) !important;
+}
+
+.genre-cards__more-text {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .genre-cards__card {
+    flex: 0 0 150px;
+    min-height: 100px;
+  }
+
+  .genre-cards__title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .genre-cards__card {
+    flex: 0 0 130px;
+    min-height: 90px;
+    padding: var(--space-3);
+  }
+
+  .genre-cards__card-name {
+    font-size: var(--font-size-base);
+  }
+}

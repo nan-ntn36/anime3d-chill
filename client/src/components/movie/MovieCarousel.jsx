@@ -1,14 +1,16 @@
 /**
  * MovieCarousel — Slider nổi bật dùng CSS scroll-snap
  * Hiển thị các phim nổi bật dạng horizontal scroll
+ * Props: title, movies, loading, viewAllLink, icon
  */
 
 import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import MovieCard from './MovieCard';
 import { SkeletonCard } from '@components/ui/Skeleton';
 import './MovieCarousel.css';
 
-export default function MovieCarousel({ movies = [], loading = false, title }) {
+export default function MovieCarousel({ movies = [], loading = false, title, viewAllLink, icon }) {
   const scrollRef = useRef(null);
 
   const scroll = (direction) => {
@@ -24,7 +26,17 @@ export default function MovieCarousel({ movies = [], loading = false, title }) {
     <div className="movie-carousel">
       {title && (
         <div className="movie-carousel__header">
-          <h2 className="movie-carousel__title">{title}</h2>
+          <div className="movie-carousel__title-group">
+            <h2 className="movie-carousel__title">
+              {icon && <span className="movie-carousel__icon">{icon}</span>}
+              {title}
+            </h2>
+            {viewAllLink && (
+              <Link to={viewAllLink} className="movie-carousel__view-all">
+                Xem toàn bộ &gt;
+              </Link>
+            )}
+          </div>
           <div className="movie-carousel__nav">
             <button onClick={() => scroll('left')} className="movie-carousel__arrow" aria-label="Trước">
               ‹

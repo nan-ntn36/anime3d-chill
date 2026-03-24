@@ -30,6 +30,7 @@ export default function MovieCard({ movie }) {
           src={imageUrl}
           alt={title}
           loading="lazy"
+          referrerPolicy="no-referrer"
           onError={(e) => {
             e.target.src = '/placeholder-poster.svg';
           }}

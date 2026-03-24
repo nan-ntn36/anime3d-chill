@@ -1,9 +1,11 @@
 /**
- * HomePage — Trang chủ: phim mới, phim bộ, phim lẻ, thể loại
- * Dữ liệu thật từ API qua TanStack Query hooks
+ * HomePage — Trang chủ: hero banner, genre cards, movie sections
+ * Layout theo rophim.best reference
  */
 
 import { Helmet } from 'react-helmet-async';
+import HeroBanner from '@components/home/HeroBanner';
+import GenreCards from '@components/home/GenreCards';
 import MovieCarousel from '@components/movie/MovieCarousel';
 import ErrorFallback from '@components/common/ErrorFallback';
 import { useNewMovies, useMoviesByList, useMoviesByGenre } from '@/hooks/useMovies';
@@ -13,27 +15,28 @@ export default function Home() {
   const newMovies = useNewMovies(1);
   const phimBo = useMoviesByList('phim-bo', 1);
   const phimLe = useMoviesByList('phim-le', 1);
+  const hoatHinh = useMoviesByList('hoat-hinh', 1);
   const hanhDong = useMoviesByGenre('hanh-dong', 1);
 
   return (
     <>
       <Helmet>
         <title>Anime3D-Chill — Xem Phim Anime Online</title>
-        <meta name="description" content="Xem phim anime miễn phí với giao diện 3D hiện đại. Cập nhật phim mới mỗi ngày." />
+        <meta name="description" content="Xem phim anime miễn phí với giao diện hiện đại. Cập nhật phim mới mỗi ngày." />
       </Helmet>
 
-      <div className="home container">
-        {/* Hero Section */}
-        <section className="home__hero animate-slideUp">
-          <h1>
-            Chào mừng đến <span className="text-gradient">Anime3D-Chill</span>
-          </h1>
-          <p className="home__subtitle">
-            Xem phim anime với giao diện hiện đại. Cập nhật mỗi ngày.
-          </p>
-        </section>
+      {/* Hero Banner — full-width, outside container */}
+      <HeroBanner
+        movies={newMovies.data?.items || []}
+        loading={newMovies.isLoading}
+      />
 
-        {/* Phim Mới */}
+      {/* Genre Cards */}
+      <GenreCards />
+
+      {/* Movie Sections */}
+      <div className="home container">
+        {/* Phim Mới Cập Nhật */}
         <section className="home__section">
           {newMovies.isError ? (
             <ErrorFallback
@@ -42,9 +45,11 @@ export default function Home() {
             />
           ) : (
             <MovieCarousel
-              title="🔥 Phim Mới Cập Nhật"
+              title="Phim Mới Cập Nhật"
+              icon="🔥"
               movies={newMovies.data?.items || []}
               loading={newMovies.isLoading}
+              viewAllLink="/phim-moi"
             />
           )}
         </section>
@@ -58,9 +63,11 @@ export default function Home() {
             />
           ) : (
             <MovieCarousel
-              title="📺 Phim Bộ"
+              title="Phim Bộ"
+              icon="📺"
               movies={phimBo.data?.items || []}
               loading={phimBo.isLoading}
+              viewAllLink="/danh-sach/phim-bo"
             />
           )}
         </section>
@@ -74,14 +81,34 @@ export default function Home() {
             />
           ) : (
             <MovieCarousel
-              title="🎬 Phim Lẻ"
+              title="Phim Lẻ"
+              icon="🎬"
               movies={phimLe.data?.items || []}
               loading={phimLe.isLoading}
+              viewAllLink="/danh-sach/phim-le"
             />
           )}
         </section>
 
-        {/* Hành Động — thể loại khác biệt, tránh trùng với Phim Bộ */}
+        {/* Hoạt Hình */}
+        <section className="home__section">
+          {hoatHinh.isError ? (
+            <ErrorFallback
+              message="Không thể tải hoạt hình"
+              onRetry={() => hoatHinh.refetch()}
+            />
+          ) : (
+            <MovieCarousel
+              title="Hoạt Hình"
+              icon="🎨"
+              movies={hoatHinh.data?.items || []}
+              loading={hoatHinh.isLoading}
+              viewAllLink="/danh-sach/hoat-hinh"
+            />
+          )}
+        </section>
+
+        {/* Hành Động */}
         <section className="home__section">
           {hanhDong.isError ? (
             <ErrorFallback
@@ -90,9 +117,11 @@ export default function Home() {
             />
           ) : (
             <MovieCarousel
-              title="💥 Hành Động"
+              title="Hành Động"
+              icon="💥"
               movies={hanhDong.data?.items || []}
               loading={hanhDong.isLoading}
+              viewAllLink="/the-loai/hanh-dong"
             />
           )}
         </section>

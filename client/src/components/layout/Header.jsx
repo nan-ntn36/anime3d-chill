@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiSearch, FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import useAuthStore from '@store/authStore';
 import './Header.css';
@@ -7,12 +7,33 @@ import './Header.css';
 /**
  * Header — Navigation chính
  * Logo, nav links, search, user menu
+ * Transparent mode on homepage (scrolls to solid)
  */
 export default function Header() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
   const { isAuthenticated, user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHome = location.pathname === '/';
+
+  // Scroll listener for transparent header on homepage
+  useEffect(() => {
+    if (!isHome) {
+      setIsScrolled(true); // always solid on non-home pages
+      return;
+    }
+
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+
+    onScroll(); // initial check
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -28,8 +49,10 @@ export default function Header() {
     navigate('/');
   };
 
+  const headerClass = `header ${isScrolled ? 'header--solid' : 'header--transparent'}`;
+
   return (
-    <header className="header">
+    <header className={headerClass}>
       <div className="header__inner container">
         {/* Logo */}
         <Link to="/" className="header__logo">
