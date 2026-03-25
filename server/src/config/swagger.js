@@ -73,7 +73,7 @@ const options = {
     tags: [
       { name: 'Health', description: 'Health check endpoints' },
       { name: 'Auth', description: 'Xác thực & phân quyền' },
-      { name: 'Movies', description: 'Proxy API phim từ nguonc.com' },
+      { name: 'Movies', description: 'Proxy API phim từ phimapi.com (KKPhim)' },
       { name: 'Me', description: 'Hồ sơ, yêu thích, lịch sử xem' },
       { name: 'Admin', description: 'Quản trị (chỉ admin)' },
     ],

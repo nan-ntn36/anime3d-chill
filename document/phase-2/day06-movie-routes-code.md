@@ -1,6 +1,6 @@
-# Ngày 6 — Movie Routes Backend + Validators · Giải Thích Code
+# Ngày 6  EMovie Routes Backend + Validators · Giải Thích Code
 
-> Giải thích theo **1 feature**: Movie API layer (validators → controller → routes).
+> Giải thích theo **1 feature**: Movie API layer (validators ↁEcontroller ↁEroutes).
 
 ---
 
@@ -13,9 +13,9 @@ graph LR
     C[Client/Swagger] --> R[movieRoutes.js]
     R --> V[movieValidators.js]
     V --> Ctrl[movieController.js]
-    Ctrl --> Svc["nguoncService.js<br/>(Day 5)"]
+    Ctrl --> Svc["kkphimService.js<br/>(Day 5)"]
     Svc --> Cache["cache.js<br/>(Day 5)"]
-    Svc --> API["phim.nguonc.com"]
+    Svc --> API["phimapi.com"]
 
     style R fill:#6c5ce7,color:#fff
     style V fill:#fdcb6e,color:#000
@@ -32,7 +32,7 @@ sequenceDiagram
     participant Router as movieRoutes
     participant Val as validators
     participant Ctrl as movieController
-    participant Svc as nguoncService
+    participant Svc as kkphimService
     participant Cache as cache.js
 
     Client->>Router: GET /api/v1/movies/new?page=1
@@ -41,9 +41,9 @@ sequenceDiagram
     Val-->>Router: Pass
     Router->>Ctrl: getNewMovies(req, res, next)
     Ctrl->>Ctrl: checkValidation(req)
-    Note over Ctrl: Nếu lỗi → throw VALIDATION_ERROR
+    Note over Ctrl: Nếu lỗi ↁEthrow VALIDATION_ERROR
     Ctrl->>Svc: getNewMovies(1)
-    Note over Svc: cachedFetch → cache/API → transform
+    Note over Svc: cachedFetch ↁEcache/API ↁEtransform
     Svc-->>Ctrl: { items, pagination }
     Ctrl->>Client: sendSuccess(res, data, { page })
 ```
@@ -52,23 +52,23 @@ sequenceDiagram
 sequenceDiagram
     participant Client
     participant Ctrl as movieController
-    participant Svc as nguoncService
-    participant API as phim.nguonc.com
+    participant Svc as kkphimService
+    participant API as phimapi.com
 
     Client->>Ctrl: GET /movies/detail/ten-phim
     Ctrl->>Svc: getMovieDetail("ten-phim")
     Svc->>API: GET /film/ten-phim
-    alt NguonC 200
+    alt KKPhim 200
         API-->>Svc: { status, movie }
         Svc-->>Ctrl: transformed detail
         Ctrl-->>Client: 200 { success: true, data }
-    else NguonC 404
+    else KKPhim 404
         API-->>Svc: 404
         Svc-->>Ctrl: throw 404 RESOURCE_NOT_FOUND
         Ctrl-->>Client: 404 { success: false }
-    else NguonC 5xx / timeout
+    else KKPhim 5xx / timeout
         API-->>Svc: error
-        Note over Svc: Retry 2x → circuit breaker
+        Note over Svc: Retry 2x ↁEcircuit breaker
         Svc-->>Ctrl: throw 502 UPSTREAM_ERROR
         Ctrl-->>Client: 502 { success: false }
     end
@@ -82,16 +82,16 @@ Express-validator rules, export dưới dạng middleware arrays:
 
 | Validator | Áp dụng cho | Rule |
 |:---|:---|:---|
-| `validatePage` | `?page=` | Optional, int 1–500, toInt() |
+| `validatePage` | `?page=` | Optional, int 1 E00, toInt() |
 | `validateSlug` | `:slug` | Required, regex `/^[a-z0-9-]+$/` |
-| `validateYear` | `:year` | Int 1900 → currentYear+2, toInt() |
+| `validateYear` | `:year` | Int 1900 ↁEcurrentYear+2, toInt() |
 | `validateSearch` | `?keyword=` | Required, max 100 chars, escape() + validatePage |
 
 ---
 
 ### File: `controllers/movieController.js`
 
-**Pattern**: `checkValidation(req)` → gọi service → `sendSuccess(res, data, meta)`
+**Pattern**: `checkValidation(req)` ↁEgọi service ↁE`sendSuccess(res, data, meta)`
 
 ```js
 // Mỗi method đều theo pattern:
@@ -99,34 +99,34 @@ async function getNewMovies(req, res, next) {
   try {
     checkValidation(req);               // 1. Validate
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getNewMovies(page);  // 2. Business logic
+    const data = await kkphimService.getNewMovies(page);  // 2. Business logic
     sendSuccess(res, data, { page });   // 3. Response
   } catch (error) {
-    next(error);                        // 4. Error → errorHandler
+    next(error);                        // 4. Error ↁEerrorHandler
   }
 }
 ```
 
-`checkValidation()` — kiểm tra express-validator results, nếu có lỗi → throw `AppError(400, VALIDATION_ERROR)`.
+`checkValidation()`  Ekiểm tra express-validator results, nếu có lỗi ↁEthrow `AppError(400, VALIDATION_ERROR)`.
 
 | Method | Params | Service Call |
 |:---|:---|:---|
-| `getNewMovies` | `?page` | `nguoncService.getNewMovies(page)` |
-| `getMoviesByList` | `:slug, ?page` | `nguoncService.getMoviesByList(slug, page)` |
-| `getMovieDetail` | `:slug` | `nguoncService.getMovieDetail(slug)` |
-| `getByGenre` | `:slug, ?page` | `nguoncService.getByGenre(slug, page)` |
-| `getByCountry` | `:slug, ?page` | `nguoncService.getByCountry(slug, page)` |
-| `getByYear` | `:year, ?page` | `nguoncService.getByYear(year, page)` |
-| `searchMovies` | `?keyword, ?page` | `nguoncService.searchMovies(keyword, page)` |
+| `getNewMovies` | `?page` | `kkphimService.getNewMovies(page)` |
+| `getMoviesByList` | `:slug, ?page` | `kkphimService.getMoviesByList(slug, page)` |
+| `getMovieDetail` | `:slug` | `kkphimService.getMovieDetail(slug)` |
+| `getByGenre` | `:slug, ?page` | `kkphimService.getByGenre(slug, page)` |
+| `getByCountry` | `:slug, ?page` | `kkphimService.getByCountry(slug, page)` |
+| `getByYear` | `:year, ?page` | `kkphimService.getByYear(year, page)` |
+| `searchMovies` | `?keyword, ?page` | `kkphimService.searchMovies(keyword, page)` |
 
 ---
 
 ### File: `routes/v1/movieRoutes.js`
 
 Mỗi route có 3 phần:
-1. **Swagger JSDoc** (`@swagger`) — tự gen docs
-2. **Validation middleware** — `[...validateSlug, ...validatePage]`
-3. **Controller handler** — `movieController.getNewMovies`
+1. **Swagger JSDoc** (`@swagger`)  Etự gen docs
+2. **Validation middleware**  E`[...validateSlug, ...validatePage]`
+3. **Controller handler**  E`movieController.getNewMovies`
 
 ```js
 router.get('/new', validatePage, movieController.getNewMovies);
@@ -151,17 +151,17 @@ Mount vào `/api/v1/movies/*`.
 
 ---
 
-## Cải Tiến Error Handling (nguoncService.js)
+## Cải Tiến Error Handling (kkphimService.js)
 
-Phân biệt **4xx** vs **5xx** từ NguonC:
+Phân biệt **4xx** vs **5xx** từ KKPhim:
 
-| NguonC Status | Xử lý | Retry? | Circuit Breaker? |
+| KKPhim Status | Xử lý | Retry? | Circuit Breaker? |
 |:---|:---|:---|:---|
-| 200 | Transform → cache → return | — | Reset |
-| 404 | throw `404 RESOURCE_NOT_FOUND` | ❌ | ❌ |
-| 400 | throw `400 VALIDATION_ERROR` | ❌ | ❌ |
-| 5xx | Retry 2x (exponential backoff) | ✅ | ✅ (sau 5 fails) |
-| Timeout | Retry 2x | ✅ | ✅ |
+| 200 | Transform ↁEcache ↁEreturn |  E| Reset |
+| 404 | throw `404 RESOURCE_NOT_FOUND` | ❁E| ❁E|
+| 400 | throw `400 VALIDATION_ERROR` | ❁E| ❁E|
+| 5xx | Retry 2x (exponential backoff) | ✁E| ✁E(sau 5 fails) |
+| Timeout | Retry 2x | ✁E| ✁E|
 
 **Tại sao**: Không nên retry/circuit-break cho lỗi client (404, 400) vì sẽ cho kết quả giống nhau.
 
@@ -171,16 +171,15 @@ Phân biệt **4xx** vs **5xx** từ NguonC:
 
 ```
 GET /api/v1/movies/detail/naruto
-    │
-    ├── movieRoutes.js        → route matching
-    ├── validateSlug           → kiểm tra slug format
-    ├── movieController        → checkValidation + gọi service
-    ├── nguoncService          → cachedFetch
-    │   ├── cache.js           → cacheGet("movies:detail:naruto")
-    │   │   └── Redis HIT?    → return cached
-    │   └── fetchFromNguonC    → GET phim.nguonc.com/api/film/naruto
-    │       ├── 200            → transform → cacheSet → return
-    │       ├── 404            → throw 404
-    │       └── 5xx/timeout    → retry → circuit breaker → throw 502
-    └── sendSuccess(res, data) → JSON response
+    ━E    ├── movieRoutes.js        ↁEroute matching
+    ├── validateSlug           ↁEkiểm tra slug format
+    ├── movieController        ↁEcheckValidation + gọi service
+    ├── kkphimService          ↁEcachedFetch
+    ━E  ├── cache.js           ↁEcacheGet("movies:detail:naruto")
+    ━E  ━E  └── Redis HIT?    ↁEreturn cached
+    ━E  └── fetchFromKKPhim    ↁEGET phimapi.com/film/naruto
+    ━E      ├── 200            ↁEtransform ↁEcacheSet ↁEreturn
+    ━E      ├── 404            ↁEthrow 404
+    ━E      └── 5xx/timeout    ↁEretry ↁEcircuit breaker ↁEthrow 502
+    └── sendSuccess(res, data) ↁEJSON response
 ```

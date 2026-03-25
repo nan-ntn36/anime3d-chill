@@ -74,7 +74,7 @@ services:
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
       CLIENT_URL: http://localhost:3000
-      NGUONC_API_URL: https://phim.nguonc.com/api
+      KKPHIM_API_URL: https://phimapi.com
       LOG_LEVEL: debug
     ports:
       - "5000:5000"

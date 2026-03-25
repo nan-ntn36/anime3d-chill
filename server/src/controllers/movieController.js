@@ -1,10 +1,10 @@
 /**
  * Movie Controller
- * Thin layer: validate input → gọi nguoncService → sendSuccess
+ * Thin layer: validate input → gọi kkphimService → sendSuccess
  * Router → Middleware(validate) → Controller → Service → Cache/API
  */
 
-const nguoncService = require('../services/nguoncService');
+const kkphimService = require('../services/kkphimService');
 const { sendSuccess } = require('../utils/response');
 const { validationResult } = require('express-validator');
 const { AppError } = require('../middleware/errorHandler');
@@ -33,7 +33,7 @@ async function getNewMovies(req, res, next) {
   try {
     checkValidation(req);
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getNewMovies(page);
+    const data = await kkphimService.getNewMovies(page);
     sendSuccess(res, data, { page });
   } catch (error) {
     next(error);
@@ -49,7 +49,7 @@ async function getMoviesByList(req, res, next) {
     checkValidation(req);
     const { slug } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getMoviesByList(slug, page);
+    const data = await kkphimService.getMoviesByList(slug, page);
     sendSuccess(res, data, { page, slug });
   } catch (error) {
     next(error);
@@ -64,7 +64,7 @@ async function getMovieDetail(req, res, next) {
   try {
     checkValidation(req);
     const { slug } = req.params;
-    const data = await nguoncService.getMovieDetail(slug);
+    const data = await kkphimService.getMovieDetail(slug);
     if (!data) {
       throw new AppError('Không tìm thấy phim', 404, 'RESOURCE_NOT_FOUND');
     }
@@ -83,7 +83,7 @@ async function getByGenre(req, res, next) {
     checkValidation(req);
     const { slug } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getByGenre(slug, page);
+    const data = await kkphimService.getByGenre(slug, page);
     sendSuccess(res, data, { page, slug });
   } catch (error) {
     next(error);
@@ -99,7 +99,7 @@ async function getByCountry(req, res, next) {
     checkValidation(req);
     const { slug } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getByCountry(slug, page);
+    const data = await kkphimService.getByCountry(slug, page);
     sendSuccess(res, data, { page, slug });
   } catch (error) {
     next(error);
@@ -115,7 +115,7 @@ async function getByYear(req, res, next) {
     checkValidation(req);
     const { year } = req.params;
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.getByYear(year, page);
+    const data = await kkphimService.getByYear(year, page);
     sendSuccess(res, data, { page, year });
   } catch (error) {
     next(error);
@@ -131,7 +131,7 @@ async function searchMovies(req, res, next) {
     checkValidation(req);
     const { keyword } = req.query;
     const page = parseInt(req.query.page, 10) || 1;
-    const data = await nguoncService.searchMovies(keyword, page);
+    const data = await kkphimService.searchMovies(keyword, page);
     sendSuccess(res, data, { page, keyword });
 
   } catch (error) {

@@ -1,6 +1,6 @@
-# Ngày 5 — Movie Proxy + Cache Backend · Hướng Dẫn Chạy
+# Ngày 5  EMovie Proxy + Cache Backend · Hướng Dẫn Chạy
 
-> Proxy tới phim.nguonc.com với cache Redis, retry, circuit breaker.
+> Proxy tới phimapi.com với cache Redis, retry, circuit breaker.
 
 ---
 
@@ -18,7 +18,7 @@ docker logs anime3d-server --tail 5
 ```bash
 docker exec anime3d-server node -e "
   process.env.LOG_LEVEL='fatal';
-  const svc = require('./src/services/nguoncService');
+  const svc = require('./src/services/kkphimService');
   (async () => {
     const d = await svc.getNewMovies(1);
     console.log('LIST:', d.items.length, 'first:', d.items[0]?.title);
@@ -53,11 +53,11 @@ CACHE: 0 ms
 ```
 server/src/
 ├── utils/
-│   └── cache.js               ← Redis wrapper + memory fallback
+━E  └── cache.js               ↁERedis wrapper + memory fallback
 ├── services/
-│   ├── nguoncService.js       ← Proxy 7 endpoints + cache + retry + CB
-│   ├── nguoncTransformer.js   ← Normalize NguonC → frontend format
-│   └── authService.js         ← (Day 3)
+━E  ├── kkphimService.js       ↁEProxy 7 endpoints + cache + retry + CB
+━E  ├── kkphimTransformer.js   ↁENormalize KKPhim ↁEfrontend format
+━E  └── authService.js         ↁE(Day 3)
 ```
 
 ---
@@ -69,7 +69,7 @@ server/src/
 | Phim mới | 5 phút | `movies:new:page:{n}` |
 | Danh sách | 15 phút | `movies:list:{slug}:page:{n}` |
 | Chi tiết | 30 phút | `movies:detail:{slug}` |
-| Thể loại | 15 phút | `movies:genre:{slug}:page:{n}` |
+| ThềEloại | 15 phút | `movies:genre:{slug}:page:{n}` |
 | Quốc gia | 15 phút | `movies:country:{slug}:page:{n}` |
 | Năm | 15 phút | `movies:year:{y}:page:{n}` |
 | Tìm kiếm | 3 phút | `movies:search:{kw}:page:{n}` |

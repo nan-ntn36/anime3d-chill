@@ -8,6 +8,7 @@ import AppLayout from '@components/layout/AppLayout';
 const Home = lazy(() => import('@pages/Home'));
 const Login = lazy(() => import('@pages/Login'));
 const MovieDetail = lazy(() => import('@pages/MovieDetail'));
+const MoviePlayerPage = lazy(() => import('@pages/MoviePlayerPage'));
 const NotFound = lazy(() => import('@pages/NotFound'));
 
 /**
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/quoc-gia" element={<Home />} />
           <Route path="/tim-kiem" element={<Home />} />
           <Route path="/phim/:slug" element={<MovieDetail />} />
+          <Route path="/phim/:slug/xem" element={<MoviePlayerPage />} />
           <Route path="/dang-nhap" element={<Login />} />
           <Route path="/dang-ky" element={<Login />} />
           <Route path="*" element={<NotFound />} />
@@ -43,3 +45,4 @@ export default function App() {
     </Suspense>
   );
 }
+

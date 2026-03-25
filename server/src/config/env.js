@@ -59,7 +59,7 @@ const env = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
 
   // External API
-  nguoncApiUrl: process.env.NGUONC_API_URL || 'https://phim.nguonc.com/api',
+  kkphimApiUrl: process.env.KKPHIM_API_URL || 'https://phimapi.com',
 
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',

@@ -1,19 +1,19 @@
 # Anime3D-Chill — Website Xem Phim
 
-Xây dựng website xem phim với giao diện dark theme cao cấp lấy cảm hứng từ RoPhim (cervatto.net/phimmoi), sử dụng API từ phim.nguonc.com, tích hợp Three.js cho banner 3D, và hệ thống quản lý người dùng với JWT + SQL.
+Xây dựng website xem phim với giao diện dark theme cao cấp lấy cảm hứng từ RoPhim (cervatto.net/phimmoi), sử dụng API từ phimapi.com (KKPhim), tích hợp Three.js cho banner 3D, và hệ thống quản lý người dùng với JWT + SQL.
 
 ---
 
 ## Rủi Ro & Giả Định
 
 > [!CAUTION]
-> **Phụ thuộc API bên thứ 3**: phim.nguonc.com có thể thay đổi cấu trúc, giới hạn request, hoặc ngừng hoạt động bất cứ lúc nào. Backend cần lớp **chuẩn hóa response** + cache để giảm phụ thuộc trực tiếp.
+> **Phụ thuộc API bên thứ 3**: phimapi.com (KKPhim) có thể thay đổi cấu trúc, giới hạn request, hoặc ngừng hoạt động bất cứ lúc nào. Backend cần lớp **chuẩn hóa response** + cache để giảm phụ thuộc trực tiếp.
 
 > [!WARNING]
 > **SEO hạn chế với Vite SPA**: Vite SPA không hỗ trợ SSR mặc định. Sẽ dùng `react-helmet-async` + prerender các trang quan trọng. Nếu SEO là ưu tiên tối đa → cân nhắc chuyển sang Next.js sau này.
 
 > [!WARNING]
-> **CORS & Proxy API**: API phim.nguonc.com không hỗ trợ CORS cho frontend trực tiếp. Backend Node.js sẽ đóng vai trò **proxy** để tránh lỗi CORS.
+> **CORS & Proxy API**: API phimapi.com (KKPhim) không hỗ trợ CORS cho frontend trực tiếp. Backend Node.js sẽ đóng vai trò **proxy** để tránh lỗi CORS.
 
 > [!IMPORTANT]
 > **Rủi ro Player**: Luồng M3U8 có thể chết, CORS media lỗi, hoặc thiếu nguồn cho một số tập phim. Player cần có fallback, retry, và xử lý lỗi đầy đủ.
@@ -207,8 +207,8 @@ E:\workline\anime3d-chill\
         │   ├── requestId.js          # Gắn ID cho mỗi request
         │   └── errorHandler.js       # Xử lý lỗi tập trung
         ├── services/
-        │   ├── nguoncService.js      # Proxy + cache + circuit breaker
-        │   └── nguoncTransformer.js  # Chuẩn hóa response
+        │   ├── kkphimService.js      # Proxy + cache + circuit breaker
+        │   └── kkphimTransformer.js  # Chuẩn hóa response
         ├── validators/
         │   ├── authValidators.js
         │   ├── movieValidators.js
@@ -355,7 +355,7 @@ sequenceDiagram
 │  Client   │────▶│  Server  │────▶│  Redis Cache  │
 │           │     │          │     │               │
 │           │     │          │  ✗  │               │
-│           │     │          │────▶│  nguonc.com   │
+│           │     │          │────▶│  phimapi.com  │
 │           │     │          │     │  (API nguồn)  │
 └───────────┘     └──────────┘     └───────────────┘
 ```
@@ -777,7 +777,7 @@ export const useMovieDetail = (slug) =>
 - **ID Request**: UUID gắn vào mỗi request qua middleware → ghi trong toàn bộ xử lý
 - **Log có cấu trúc**: Dạng JSON gồm `requestId`, `method`, `url`, `statusCode`, `duration`, `userId`
 - **Log sự kiện xác thực**: Đăng nhập thành công/thất bại, làm mới token, đăng xuất
-- **Độ trễ API nguồn**: Ghi thời gian phản hồi mỗi lần gọi phim.nguonc.com
+- **Độ trễ API nguồn**: Ghi thời gian phản hồi mỗi lần gọi phimapi.com (KKPhim)
 - **Tập trung lỗi**: Xử lý lỗi tập trung ghi đầy đủ stack + context
 - **`/api/v1/health`**: Trả `{ status: 'ok', uptime, dbConnection, redisConnection }`
 - **`/api/v1/ready`**: Trả trạng thái sẵn sàng dựa trên kết nối DB + Redis
@@ -883,7 +883,7 @@ useEffect(() => {
 
 ### 16. CDN & Proxy Ảnh
 
-**Vấn đề:** Poster/thumb từ `img.phim.nguonc.com` có thể chậm hoặc không ổn định.
+**Vấn đề:** Poster/thumb từ `phimimg.com` có thể chậm hoặc không ổn định.
 
 **Giải pháp:**
 - Backend proxy ảnh: `GET /api/v1/images/:encodedUrl` → fetch ảnh → trả về với cache headers
@@ -1155,7 +1155,7 @@ JWT_REFRESH_EXPIRES_IN=30d
 REDIS_URL=redis://localhost:6379
 
 # API Nguồn
-NGUONC_API_BASE=https://phim.nguonc.com/api
+KKPHIM_API_URL=https://phimapi.com
 
 # Feature Flags
 FEATURE_3D_BANNER=true
@@ -1214,7 +1214,7 @@ services:
 **Backend:**
 - Dịch vụ auth: mã hóa mật khẩu, xác minh đăng nhập, token rotation
 - Hàm JWT: tạo, xác minh, giải mã, xử lý hết hạn
-- Hàm chuyển đổi: dữ liệu thô nguonc → định dạng chuẩn hóa
+- Hàm chuyển đổi: dữ liệu thô KKPhim → định dạng chuẩn hóa
 - Tiện ích cache: set/get/xóa
 - Validators: tất cả quy tắc xác thực đầu vào
 

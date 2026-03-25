@@ -1,6 +1,6 @@
 /**
- * NguonC Service
- * Proxy tới phim.nguonc.com/api với:
+ * KKPhim Service
+ * Proxy tới phimapi.com với:
  * - Cache-first strategy (Redis → API → save cache)
  * - Retry (2 lần, exponential backoff)
  * - Circuit breaker (5 fails → ngắt 60s)
@@ -10,12 +10,12 @@
 const axios = require('axios');
 const env = require('../config/env');
 const { cacheGet, cacheSet } = require('../utils/cache');
-const { transformMovieList, transformMovieDetail } = require('./nguoncTransformer');
+const { transformMovieList, transformMovieDetail } = require('./kkphimTransformer');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 
 // ── Config ──────────────────────────────────────────────────
-const API_BASE = env.nguoncApiUrl;
+const API_BASE = env.kkphimApiUrl;
 const TIMEOUT = 10000;        // 10s
 const MAX_RETRIES = 2;
 
@@ -62,7 +62,7 @@ function recordFailure() {
 }
 
 // ── HTTP Client with Retry ──────────────────────────────────
-async function fetchFromNguonC(path, retries = MAX_RETRIES) {
+async function fetchFromKKPhim(path, retries = MAX_RETRIES) {
   if (isCircuitOpen()) {
     throw new AppError(
       'Dịch vụ nguồn phim tạm thời không khả dụng',
@@ -85,16 +85,16 @@ async function fetchFromNguonC(path, retries = MAX_RETRIES) {
       });
       const duration = Date.now() - start;
 
-      logger.debug({ url, duration: `${duration}ms`, attempt }, 'NguonC API response');
+      logger.debug({ url, duration: `${duration}ms`, attempt }, 'KKPhim API response');
       recordSuccess();
 
       return response.data;
     } catch (error) {
       const status = error.response?.status;
 
-      // 4xx từ NguonC → lỗi client, không retry, không circuit breaker
+      // 4xx → lỗi client, không retry, không circuit breaker
       if (status && status >= 400 && status < 500) {
-        logger.warn({ url, status }, 'NguonC API client error');
+        logger.warn({ url, status }, 'KKPhim API client error');
         if (status === 404) {
           throw new AppError('Không tìm thấy nội dung', 404, 'RESOURCE_NOT_FOUND');
         }
@@ -111,7 +111,7 @@ async function fetchFromNguonC(path, retries = MAX_RETRIES) {
           attempt,
           status,
           message: error.message,
-        }, 'NguonC API failed after retries');
+        }, 'KKPhim API failed after retries');
 
         throw new AppError(
           'Không thể lấy dữ liệu phim từ nguồn',
@@ -122,7 +122,7 @@ async function fetchFromNguonC(path, retries = MAX_RETRIES) {
 
       // Exponential backoff
       const delay = Math.pow(2, attempt) * 500; // 500ms, 1000ms
-      logger.warn({ url, attempt, delay }, 'NguonC API retry');
+      logger.warn({ url, attempt, delay }, 'KKPhim API retry');
       await new Promise((r) => setTimeout(r, delay));
     }
   }
@@ -142,8 +142,8 @@ async function cachedFetch(cacheKey, apiPath, ttl, transformer) {
   }
 
   // 2. Gọi API nguồn
-  logger.debug({ cacheKey, apiPath }, 'Cache MISS, fetching from NguonC');
-  const rawData = await fetchFromNguonC(apiPath);
+  logger.debug({ cacheKey, apiPath }, 'Cache MISS, fetching from KKPhim');
+  const rawData = await fetchFromKKPhim(apiPath);
 
   // 3. Transform
   const transformed = transformer(rawData);
@@ -158,11 +158,12 @@ async function cachedFetch(cacheKey, apiPath, ttl, transformer) {
 
 /**
  * Phim mới cập nhật
+ * KKPhim: GET /danh-sach/phim-moi-cap-nhat?page=
  */
 async function getNewMovies(page = 1) {
   return cachedFetch(
     `movies:new:page:${page}`,
-    `/films/phim-moi-cap-nhat?page=${page}`,
+    `/danh-sach/phim-moi-cap-nhat?page=${page}`,
     TTL.NEW,
     transformMovieList
   );
@@ -170,11 +171,12 @@ async function getNewMovies(page = 1) {
 
 /**
  * Danh sách phim theo slug (phim-bo, phim-le, hoat-hinh, ...)
+ * KKPhim: GET /v1/api/danh-sach/{slug}?page=
  */
 async function getMoviesByList(slug, page = 1) {
   return cachedFetch(
     `movies:list:${slug}:page:${page}`,
-    `/films/danh-sach/${slug}?page=${page}`,
+    `/v1/api/danh-sach/${slug}?page=${page}`,
     TTL.LIST,
     transformMovieList
   );
@@ -182,11 +184,12 @@ async function getMoviesByList(slug, page = 1) {
 
 /**
  * Chi tiết phim
+ * KKPhim: GET /phim/{slug}
  */
 async function getMovieDetail(slug) {
   return cachedFetch(
     `movies:detail:${slug}`,
-    `/film/${slug}`,
+    `/phim/${slug}`,
     TTL.DETAIL,
     transformMovieDetail
   );
@@ -194,11 +197,12 @@ async function getMovieDetail(slug) {
 
 /**
  * Phim theo thể loại
+ * KKPhim: GET /v1/api/the-loai/{slug}?page=
  */
 async function getByGenre(slug, page = 1) {
   return cachedFetch(
     `movies:genre:${slug}:page:${page}`,
-    `/films/the-loai/${slug}?page=${page}`,
+    `/v1/api/the-loai/${slug}?page=${page}`,
     TTL.GENRE,
     transformMovieList
   );
@@ -206,11 +210,12 @@ async function getByGenre(slug, page = 1) {
 
 /**
  * Phim theo quốc gia
+ * KKPhim: GET /v1/api/quoc-gia/{slug}?page=
  */
 async function getByCountry(slug, page = 1) {
   return cachedFetch(
     `movies:country:${slug}:page:${page}`,
-    `/films/quoc-gia/${slug}?page=${page}`,
+    `/v1/api/quoc-gia/${slug}?page=${page}`,
     TTL.COUNTRY,
     transformMovieList
   );
@@ -218,11 +223,12 @@ async function getByCountry(slug, page = 1) {
 
 /**
  * Phim theo năm
+ * KKPhim: GET /v1/api/nam/{year}?page=
  */
 async function getByYear(year, page = 1) {
   return cachedFetch(
     `movies:year:${year}:page:${page}`,
-    `/films/nam-phat-hanh/${year}?page=${page}`,
+    `/v1/api/nam/${year}?page=${page}`,
     TTL.YEAR,
     transformMovieList
   );
@@ -230,12 +236,13 @@ async function getByYear(year, page = 1) {
 
 /**
  * Tìm kiếm phim
+ * KKPhim: GET /v1/api/tim-kiem?keyword=&page=
  */
 async function searchMovies(keyword, page = 1) {
   const safeKw = encodeURIComponent(keyword.trim().toLowerCase());
   return cachedFetch(
     `movies:search:${safeKw}:page:${page}`,
-    `/films/search?keyword=${safeKw}&page=${page}`,
+    `/v1/api/tim-kiem?keyword=${safeKw}&page=${page}`,
     TTL.SEARCH,
     transformMovieList
   );

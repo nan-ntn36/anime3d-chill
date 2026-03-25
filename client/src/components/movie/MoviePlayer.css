@@ -1,0 +1,571 @@
+/* ══════════════════════════════════════════════════════════════
+   MoviePlayer — Custom Video Player
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.movie-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  user-select: none;
+}
+
+.movie-player--theater {
+  border-radius: 0;
+  aspect-ratio: auto;
+  height: 80vh;
+}
+
+.movie-player--fullscreen {
+  border-radius: 0;
+  height: 100vh;
+}
+
+.movie-player video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── Controls Overlay ────────────────────────────────────── */
+.movie-player__controls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 2;
+}
+
+.movie-player:hover .movie-player__controls,
+.movie-player__controls--visible {
+  opacity: 1;
+}
+
+/* ── Center Play Button ──────────────────────────────────── */
+.movie-player__center-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(108, 92, 231, 0.85);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 0 30px rgba(108, 92, 231, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.movie-player__center-play:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: rgba(108, 92, 231, 1);
+}
+
+/* ── Progress Bar ────────────────────────────────────────── */
+.movie-player__progress {
+  padding: 0 var(--space-4);
+  cursor: pointer;
+}
+
+.movie-player__progress-bar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: visible;
+  transition: height var(--transition-fast);
+}
+
+.movie-player__progress:hover .movie-player__progress-bar {
+  height: 6px;
+}
+
+.movie-player__progress-buffered {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.movie-player__progress-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-accent-gradient);
+  border-radius: 2px;
+}
+
+.movie-player__progress-thumb {
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(108, 92, 231, 0.6);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.movie-player__progress:hover .movie-player__progress-thumb {
+  opacity: 1;
+}
+
+/* ── Bottom Controls ─────────────────────────────────────── */
+.movie-player__bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.movie-player__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.movie-player__btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent-hover);
+}
+
+.movie-player__btn--active {
+  color: var(--color-accent);
+}
+
+/* ── Volume Slider ───────────────────────────────────────── */
+.movie-player__volume-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.movie-player__volume-slider {
+  width: 0;
+  overflow: hidden;
+  transition: width var(--transition-base);
+}
+
+.movie-player__volume-group:hover .movie-player__volume-slider {
+  width: 80px;
+}
+
+.movie-player__volume-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.movie-player__volume-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.movie-player__volume-input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Time Display ────────────────────────────────────────── */
+.movie-player__time {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.8);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Spacer ──────────────────────────────────────────────── */
+.movie-player__spacer {
+  flex: 1;
+}
+
+/* ── Buffering Spinner ───────────────────────────────────── */
+.movie-player__buffering {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+
+.movie-player__buffering .spinner {
+  width: 48px;
+  height: 48px;
+  border-width: 4px;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: var(--color-accent);
+}
+
+/* ── Error State ─────────────────────────────────────────── */
+.movie-player__error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 5;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.movie-player__error-icon {
+  font-size: 2.5rem;
+  color: var(--color-error);
+  opacity: 0.8;
+}
+
+.movie-player__error-text {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 320px;
+}
+
+.movie-player__error-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── Keyboard Hints ──────────────────────────────────────── */
+.movie-player__shortcuts {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 4;
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.movie-player:hover .movie-player__shortcuts {
+  opacity: 1;
+}
+
+/* ── Embed Iframe ────────────────────────────────────────── */
+.movie-player__embed-notice {
+  position: absolute;
+  bottom: var(--space-2);
+  right: var(--space-2);
+  z-index: 10;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MoviePlayerPage Layout
+   ═══════════════════════════════════════════════════════════ */
+
+.player-page {
+  min-height: 100vh;
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+.player-page__main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.player-page--theater .player-page__main {
+  max-width: 100%;
+  padding: 0;
+}
+
+/* ── Info Bar ────────────────────────────────────────────── */
+.player-page__info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  flex-wrap: wrap;
+}
+
+.player-page__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.player-page__breadcrumb a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.player-page__breadcrumb a:hover {
+  color: var(--color-accent);
+}
+
+.player-page__breadcrumb-sep {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+}
+
+.player-page__current-ep {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.player-page__theater-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.player-page__theater-toggle:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+
+.player-page__theater-toggle--active {
+  color: var(--color-accent);
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-light);
+}
+
+/* ── Below Player Content ────────────────────────────────── */
+.player-page__content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-8);
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--space-6);
+}
+
+.player-page--theater .player-page__content {
+  padding-top: var(--space-6);
+}
+
+/* ── Episode Sidebar ─────────────────────────────────────── */
+.player-page__episodes {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.player-page__episodes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.player-page__episodes-title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+}
+
+.player-page__server-select {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.player-page__episodes-list {
+  padding: var(--space-3);
+  max-height: 500px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: var(--space-2);
+}
+
+.player-page__ep-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 36px;
+  text-decoration: none;
+}
+
+.player-page__ep-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.player-page__ep-btn--active {
+  color: white;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 12px rgba(108, 92, 231, 0.4);
+  pointer-events: none;
+}
+
+/* ── Movie Info Below Player ─────────────────────────────── */
+.player-page__movie-info h2 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-3);
+}
+
+.player-page__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.player-page__tag {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.player-page__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+/* ── Player Error Boundary ───────────────────────────────── */
+.player-error-boundary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16/9;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  gap: var(--space-4);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.player-error-boundary h3 {
+  color: var(--color-error);
+}
+
+.player-error-boundary p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Responsive
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .player-page__content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .movie-player__center-play {
+    width: 56px;
+    height: 56px;
+    font-size: 1.2rem;
+  }
+
+  .movie-player__btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+  }
+
+  .movie-player__bottom {
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .movie-player__shortcuts {
+    display: none;
+  }
+
+  .player-page__info-bar {
+    padding: var(--space-3) 0;
+  }
+
+  .player-page__episodes-list {
+    grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+    max-height: 300px;
+  }
+}

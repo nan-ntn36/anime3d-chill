@@ -1,6 +1,6 @@
 /**
- * NguonC Data Transformer
- * Chuẩn hóa dữ liệu thô từ phim.nguonc.com → format frontend
+ * KKPhim Data Transformer
+ * Chuẩn hóa dữ liệu thô từ phimapi.com (KKPhim) → format frontend
  */
 
 const IMG_CDN = 'https://phimimg.com';
@@ -46,21 +46,32 @@ function normalizeMovieItem(raw) {
 
 /**
  * Transform danh sách phim
- * @param {object} rawResponse - response từ NguonC API
+ * KKPhim list API trả về: { status, items, pagination }
+ * pagination: { totalItems, totalItemsPerPage, currentPage, totalPages }
+ * @param {object} rawResponse - response từ KKPhim API
  * @returns {{ items: Array, pagination: object }}
  */
 function transformMovieList(rawResponse) {
-  // NguonC list API trả về: { status, paginate, items }
-  const items = Array.isArray(rawResponse?.items)
-    ? rawResponse.items.map(normalizeMovieItem).filter(Boolean)
+  // KKPhim: items ở root, hoặc trong data.items (v1 api endpoint)
+  const rawItems = rawResponse?.items
+    || rawResponse?.data?.items
+    || [];
+
+  const items = Array.isArray(rawItems)
+    ? rawItems.map(normalizeMovieItem).filter(Boolean)
     : [];
 
-  const paginate = rawResponse?.paginate || {};
+  // KKPhim pagination: trực tiếp trong root hoặc trong params.pagination hoặc data.params.pagination
+  const paginate = rawResponse?.pagination
+    || rawResponse?.data?.params?.pagination
+    || rawResponse?.params?.pagination
+    || {};
+
   const pagination = {
-    currentPage: parseInt(paginate.current_page || 1, 10),
-    totalPages: parseInt(paginate.total_page || 1, 10),
-    totalItems: parseInt(paginate.total_items || items.length, 10),
-    itemsPerPage: parseInt(paginate.items_per_page || items.length, 10),
+    currentPage: parseInt(paginate.currentPage || paginate.current_page || 1, 10),
+    totalPages: parseInt(paginate.totalPages || paginate.total_page || 1, 10),
+    totalItems: parseInt(paginate.totalItems || paginate.total_items || items.length, 10),
+    itemsPerPage: parseInt(paginate.totalItemsPerPage || paginate.items_per_page || items.length, 10),
   };
 
   return { items, pagination };
@@ -68,12 +79,15 @@ function transformMovieList(rawResponse) {
 
 /**
  * Transform chi tiết phim
- * @param {object} rawResponse - response từ NguonC API
+ * KKPhim detail API trả về: { status, movie, episodes }
+ * episodes tách riêng khỏi movie object
+ * @param {object} rawResponse - response từ KKPhim API
  * @returns {object} normalized movie detail
  */
 function transformMovieDetail(rawResponse) {
-  // NguonC detail API trả về: { status, movie }
+  // KKPhim: movie ở root, episodes tách riêng
   const raw = rawResponse?.movie || rawResponse?.data?.item || rawResponse;
+  const rawEpisodes = rawResponse?.episodes || raw?.episodes || [];
 
   if (!raw) return null;
 
@@ -88,13 +102,14 @@ function transformMovieDetail(rawResponse) {
     type: raw.type || '',
     showtimes: raw.showtimes || '',
     trailerUrl: raw.trailer_url || null,
-    episodes: transformEpisodes(raw.episodes || []),
+    episodes: transformEpisodes(rawEpisodes),
   };
 }
 
 /**
  * Transform danh sách tập phim
- * @param {Array} rawEpisodes - mảng server data từ NguonC
+ * KKPhim episode format: { server_name, server_data: [{ name, slug, link_embed, link_m3u8 }] }
+ * @param {Array} rawEpisodes - mảng server data từ KKPhim
  * @returns {Array<{ serverName: string, items: Array }>}
  */
 function transformEpisodes(rawEpisodes) {

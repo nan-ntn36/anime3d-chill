@@ -20,7 +20,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Movies
- *   description: API phim — proxy từ NguonC với cache
+ *   description: API phim — proxy từ KKPhim với cache
  */
 
 /**

@@ -202,19 +202,24 @@ Thêm vào cuối mỗi ngày làm việc:
 
 ### Ngày 5 · Movie Proxy + Cache Backend
 
-**Module: nguonc Service**
-- [x] `src/services/nguoncService.js` — proxy gọi API phim.nguonc.com
+**Module: kkphim Service (đổi từ nguonc)**
+- [x] ~~`src/services/nguoncService.js`~~ → `src/services/kkphimService.js` — proxy gọi API phimapi.com
 - [x] Implement cache-first strategy (Redis → API → save cache)
 - [x] Implement retry (2 lần, exponential backoff)
 - [x] Implement circuit breaker (5 fails → ngắt 60s)
 - [x] Stale-while-revalidate logic
 - [x] Fallback khi Redis down → `node-cache` in-memory
+- [x] ⚠️ **[MIGRATION]** Đổi `NGUONC_API_URL` → `KKPHIM_API_URL=https://phimapi.com` trong `.env`, `.env.example`
+- [x] ⚠️ **[MIGRATION]** Cập nhật API paths: `/films/...` → `/danh-sach/...`, `/v1/api/...`
+- [x] ⚠️ **[MIGRATION]** Rename file + functions: `fetchFromNguonC` → `fetchFromKKPhim`
 
-**Module: Data Transformer**
-- [x] `src/services/nguoncTransformer.js`
+**Module: Data Transformer (đổi từ nguonc)**
+- [x] ~~`src/services/nguoncTransformer.js`~~ → `src/services/kkphimTransformer.js`
   - [x] `transformMovieListResponse()` → `{ items, pagination }`
   - [x] `transformMovieDetailResponse()` → normalized detail
   - [x] `transformEpisodeResponse()` → normalized episodes
+  - [x] ⚠️ **[MIGRATION]** Cập nhật pagination: `params.pagination` thay vì `paginate`
+  - [x] ⚠️ **[MIGRATION]** Cập nhật detail: episodes tách riêng (`rawResponse.episodes`)
 
 **Module: Cache Helper**
 - [x] `src/utils/cache.js` — get/set/del/flush helpers cho Redis
@@ -283,31 +288,31 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 9 · Trang Chi Tiết Phim
 
 **Module: MovieDetailPage**
-- [ ] `src/pages/MovieDetailPage.jsx`:
-  - [ ] Hiển thị poster, title, mô tả, thể loại, quốc gia, năm, diễn viên, đạo diễn
-  - [ ] Danh sách tập (grid/list selector)
-  - [ ] Selector server (dropdown)
-  - [ ] Nút Yêu thích (toggle)
-  - [ ] Prefetch m3u8 URL tập 1
-- [ ] SEO: `react-helmet-async` cho title + meta description + OG image
+- [x] `src/pages/MovieDetailPage.jsx`:
+  - [x] Hiển thị poster, title, mô tả, thể loại, quốc gia, năm, diễn viên, đạo diễn
+  - [x] Danh sách tập (grid/list selector)
+  - [x] Selector server (dropdown)
+  - [x] Nút Yêu thích (toggle)
+  - [x] Prefetch m3u8 URL tập 1
+- [x] SEO: `react-helmet-async` cho title + meta description + OG image
 
 ---
 
 ### Ngày 10–11 · Video Player
 
 **Module: MoviePlayer (HLS.js)**
-- [ ] `src/components/movie/MoviePlayer.jsx`:
-  - [ ] Tích hợp `hls.js` + fallback Safari native HLS
-  - [ ] Custom controls: play/pause, progress bar, volume, fullscreen
-  - [ ] Phím tắt: Space, M, F, ←/→, ↑/↓
-  - [ ] Chế độ rạp (theater mode)
-  - [ ] Buffer/loading states (skeleton → spinner → play)
-  - [ ] Error states: stream chết → "Nguồn phim lỗi" + nút Đổi server / Thử lại
-- [ ] `src/pages/MoviePlayerPage.jsx` — page wrapper
-- [ ] `src/hooks/usePlayer.js` — hook quản lý player logic
-- [ ] ErrorBoundary riêng cho Player
-- [ ] Nhớ âm lượng → `localStorage`
-- [ ] Preload tập tiếp theo khi đạt 80% thời lượng
+- [x] `src/components/movie/MoviePlayer.jsx`:
+  - [x] Tích hợp `hls.js` + fallback Safari native HLS
+  - [x] Custom controls: play/pause, progress bar, volume, fullscreen
+  - [x] Phím tắt: Space, M, F, ←/→, ↑/↓
+  - [x] Chế độ rạp (theater mode)
+  - [x] Buffer/loading states (skeleton → spinner → play)
+  - [x] Error states: stream chết → "Nguồn phim lỗi" + nút Đổi server / Thử lại
+- [x] `src/pages/MoviePlayerPage.jsx` — page wrapper
+- [x] `src/hooks/usePlayer.js` — hook quản lý player logic
+- [x] ErrorBoundary riêng cho Player
+- [x] Nhớ âm lượng → `localStorage`
+- [x] Preload tập tiếp theo khi đạt 80% thời lượng
 
 ---
 
@@ -440,7 +445,7 @@ Thêm vào cuối mỗi ngày làm việc:
 - [ ] Backend:
   - [ ] `tests/unit/auth.test.js` — hash password, verify login
   - [ ] `tests/unit/jwt.test.js` — tạo/xác minh/hết hạn
-  - [ ] `tests/unit/transformer.test.js` — chuyển đổi data nguonc
+  - [ ] `tests/unit/transformer.test.js` — chuyển đổi data kkphim
   - [ ] Validators, Cache helpers
 - [ ] Frontend:
   - [ ] `MovieCard` render đúng
