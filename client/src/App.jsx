@@ -6,6 +6,7 @@ import AppLayout from '@components/layout/AppLayout';
  * Lazy load pages — code splitting
  */
 const Home = lazy(() => import('@pages/Home'));
+const ThungPhim = lazy(() => import('@pages/ThungPhim'));
 const Login = lazy(() => import('@pages/Login'));
 const MovieDetail = lazy(() => import('@pages/MovieDetail'));
 const MoviePlayerPage = lazy(() => import('@pages/MoviePlayerPage'));
@@ -31,6 +32,8 @@ export default function App() {
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<Home />} />
+          <Route path="/all-phim" element={<Home />} />
+          <Route path="/thung-phim" element={<ThungPhim />} />
           <Route path="/phim-moi" element={<Home />} />
           <Route path="/the-loai" element={<Home />} />
           <Route path="/quoc-gia" element={<Home />} />

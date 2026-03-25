@@ -36,3 +36,9 @@ coverage/
 # Temp
 tmp/
 temp/
+
+# Agents
+.agents/
+.agent/
+_agents/
+_agent/

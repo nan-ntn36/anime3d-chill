@@ -157,12 +157,25 @@ async function cachedFetch(cacheKey, apiPath, ttl, transformer) {
 // ── Public Methods ──────────────────────────────────────────
 
 /**
- * Phim mới cập nhật
- * KKPhim: GET /danh-sach/phim-moi-cap-nhat?page=
+ * Phim hoạt hình (Mặc định cho trang chủ)
+ * KKPhim: GET /v1/api/danh-sach/hoat-hinh?page=
  */
 async function getNewMovies(page = 1) {
   return cachedFetch(
-    `movies:new:page:${page}`,
+    `movies:hoat-hinh:page:${page}`,
+    `/v1/api/danh-sach/hoat-hinh?page=${page}`,
+    TTL.NEW,
+    transformMovieList
+  );
+}
+
+/**
+ * Tất cả phim mới cập nhật (Dành cho AllPhim)
+ * KKPhim: GET /danh-sach/phim-moi-cap-nhat?page=
+ */
+async function getAllMovies(page = 1) {
+  return cachedFetch(
+    `movies:all:page:${page}`,
     `/danh-sach/phim-moi-cap-nhat?page=${page}`,
     TTL.NEW,
     transformMovieList
@@ -250,6 +263,7 @@ async function searchMovies(keyword, page = 1) {
 
 module.exports = {
   getNewMovies,
+  getAllMovies,
   getMoviesByList,
   getMovieDetail,
   getByGenre,

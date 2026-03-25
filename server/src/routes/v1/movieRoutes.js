@@ -93,6 +93,24 @@ router.get('/new', validatePage, movieController.getNewMovies);
 
 /**
  * @swagger
+ * /api/v1/movies/all:
+ *   get:
+ *     summary: Tất cả phim mới cập nhật
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *     responses:
+ *       200:
+ *         description: Danh sách tất cả phim
+ */
+router.get('/all', validatePage, movieController.getAllMovies);
+
+/**
+ * @swagger
  * /api/v1/movies/list/{slug}:
  *   get:
  *     summary: Danh sách phim theo loại (phim-bo, phim-le, hoat-hinh, tv-shows)

@@ -41,6 +41,11 @@ const movieApi = {
    * Phim theo năm
    */
   getByYear: (year, page = 1) => api.get(`/movies/year/${year}`, { params: { page } }),
+
+  /**
+   * Tất cả phim (AllPhim / ThungPhim)
+   */
+  getAll: (page = 1) => api.get('/movies/all', { params: { page } }),
 };
 
 export default movieApi;

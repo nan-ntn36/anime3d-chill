@@ -1,0 +1,106 @@
+.ranking-sidebar {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-sidebar__title {
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+}
+
+.ranking-sidebar__icon {
+  color: var(--color-accent);
+}
+
+.ranking-sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ranking-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
+}
+
+.ranking-card:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.ranking-card__number {
+  font-size: 24px;
+  font-weight: 900;
+  font-style: italic;
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.ranking-card__number.rank-1 { color: #facc15; } /* Yellow */
+.ranking-card__number.rank-2 { color: #94a3b8; } /* Silver */
+.ranking-card__number.rank-3 { color: #b45309; } /* Bronze */
+
+.ranking-card__thumb {
+  width: 48px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-bg-tertiary);
+}
+
+.ranking-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ranking-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ranking-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.ranking-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.ranking-card__meta .quality {
+  border: 1px solid var(--color-border);
+  padding: 1px 4px;
+  border-radius: 4px;
+}

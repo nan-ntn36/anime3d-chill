@@ -41,6 +41,21 @@ async function getNewMovies(req, res, next) {
 }
 
 /**
+ * GET /movies/all?page=
+ * Tất cả phim mới cập nhật (Không lọc)
+ */
+async function getAllMovies(req, res, next) {
+  try {
+    checkValidation(req);
+    const page = parseInt(req.query.page, 10) || 1;
+    const data = await kkphimService.getAllMovies(page);
+    sendSuccess(res, data, { page });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
  * GET /movies/list/:slug?page=
  * Danh sách phim theo loại (phim-bo, phim-le, hoat-hinh, ...)
  */
@@ -141,6 +156,7 @@ async function searchMovies(req, res, next) {
 
 module.exports = {
   getNewMovies,
+  getAllMovies,
   getMoviesByList,
   getMovieDetail,
   getByGenre,

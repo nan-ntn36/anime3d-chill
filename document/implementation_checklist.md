@@ -55,8 +55,8 @@ document/
 │   ├── day06-movie-routes-code.md
 │   ├── day07-homepage-components-run.md
 │   ├── day07-homepage-components-code.md
-│   ├── day08-banner-3d-run.md
-│   └── day08-banner-3d-code.md
+│   ├── day08-banner-ui-run.md
+│   └── day08-banner-ui-code.md
 ├── phase-3/
 │   ├── day09-movie-detail-run.md
 │   ├── day09-movie-detail-code.md
@@ -247,9 +247,9 @@ Thêm vào cuối mỗi ngày làm việc:
 
 **Module: UI Components**
 - [x] `src/components/ui/Skeleton.jsx` — loading skeleton
-- [x] `src/components/ui/Pagination.jsx` — phân trang
+- [x] `src/components/ui/Pagination.jsx` — phân trang phim động
 - [x] `src/components/ui/SearchBar.jsx` — ô tìm kiếm
-- [x] `src/components/movie/MovieCard.jsx` + `.css` — card phim (poster, title, year, quality)
+- [x] `src/components/movie/MovieCard.jsx` + `.css` — card phim với Hover Horizontal Expansion Panel
 - [x] `src/components/movie/MovieGrid.jsx` — grid responsive
 
 **Module: Movie Hooks**
@@ -260,26 +260,25 @@ Thêm vào cuối mỗi ngày làm việc:
   - [x] `useSearchMovies(keyword, page)`
 
 **Module: Trang Chủ**
-- [x] `src/pages/HomePage.jsx` — layout sections: phim mới, phim bộ, phim lẻ
-- [x] `src/components/movie/MovieCarousel.jsx` — Swiper slider nổi bật
+- [x] `src/pages/HomePage.jsx` — layout phân mục (Anime, Phim Lẻ, v.v)
+- [x] `src/components/home/TopRankingFooter.jsx` — Footer xếp hạng 4 cột (Đang Hot, Đánh Giá, Thể Loại, Bình Luận)
 - [x] Fallback UI: component `ErrorFallback` với nút Thử lại
 
 ---
 
-### Ngày 8 · Banner 3D (Three.js)
+### Ngày 8 · Banner Cao Cấp (CSS High-Fidelity)
 
-**Module: HeroBanner3D**
-- [ ] `src/components/banner/HeroBanner3D.jsx`:
-  - [ ] Canvas scene với @react-three/fiber
-  - [ ] Poster planes trôi nổi 3D
-  - [ ] Hệ thống hạt (particles) nền
-  - [ ] Camera chuyển cảnh mượt mà
-  - [ ] Click poster → navigate tới chi tiết
-- [ ] Overlay HTML: title, genre, nút phát
-- [ ] `frameloop="demand"` + lazy load textures + `Suspense`
-- [ ] Mobile: đơn giản hóa (ít hạt, poster tĩnh)
-- [ ] Feature flag: `FEATURE_3D_BANNER` → fallback ảnh tĩnh
-- [ ] ErrorBoundary riêng cho Banner 3D
+**Module: HeroBanner**
+- [x] `src/components/home/HeroBanner.jsx` & CSS:
+  - [x] Giao diện cinematic với backdrop overlay
+  - [x] Dải hashtag: ANIME TRENDING pill badge, năm, số tập
+  - [x] Tiêu đề in nghiêng lớn + fallback mô tả nội dung phim
+  - [x] Cụm button "XEM NGAY" (vàng glow) và "LƯU LẠI" (glassmorphism)
+  - [x] Navigation Thumbnail đứng (sử dụng poster) và ảnh nền ngang (sử dụng thumb)
+  - [x] Thanh Progress horizontal dưới thumbnail
+- [x] Click thumbnail → navigate giữa các slide
+- [x] Tối ưu Performance tĩnh (chuẩn 60fps qua DOM) thay vì WebGL
+- [x] Căn chỉnh Container pixel-perfect với Grid Layout phía dưới
 
 ---
 

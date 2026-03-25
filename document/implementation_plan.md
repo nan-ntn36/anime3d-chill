@@ -1275,3 +1275,31 @@ services:
 20. Feature flags
 21. Docker production + scaling strategy
 22. Kiểm tra bảo mật
+
+---
+
+## UI Redesign (theo reference webfilm-swart)
+
+Thiết kế sẽ được làm lại theo phong cách Modern Dark Theme với các đặc điểm:
+
+1. **Hệ thống màu & Typography**:
+   - Nền: Đen tuyền (`#000000`) hoặc xám cực tối (`#09090b`).
+   - Accent: Vàng/Amber (`#EAB308`) dùng cho nút bấm, badge nổi bật, tiêu đề phụ.
+   - Font: Sans-serif (Inter/Roboto), sử dụng **In đậm & In nghiêng (Bold Italic)** cho tiêu đề phim lớn để tạo cảm giác điện ảnh.
+   - Border radius: Bo góc tròn lớn hơn (`12px-16px`).
+
+2. **Hero Banner (Trang chủ)**:
+   - Slider lớn 100% chiều ngang.
+   - Gradient đen mờ từ trái và dưới lên để text dễ đọc.
+   - Nội dung trái: Tiêu đề lớn (Italic), Badge (Năm, Số tập), Nút "XEM NGAY" (Vàng) & "LƯU LẠI" (Outline).
+   - Nội dung phải: Slider phụ dạng thumbnail nhỏ hiển thị các phim trending khác.
+
+3. **Movie Card & Hover Effect**:
+   - Mặc định: Poster dọc `aspect-ratio: 2/3`, có số tập.
+   - Hiệu ứng Hover: Card **mở rộng theo chiều ngang** sang phải (hoặc trái), hiển thị metadata (IMDb, năm, chất lượng), mô tả ngắn, và nút "XEM NGAY".
+
+4. **Trang Chi Tiết & Player**:
+   - Layout chi tiết: Poster mờ làm background, chia 2 cột. Các nút chọn server vuông vức (active màu vàng).
+   - **Video Player**: 
+     - Có viền bo góc, đổ bóng glow màu xanh mờ (`box-shadow` ambient glow) phía sau player để tạo độ sâu.
+     - Layout thu phóng (Theater mode): Nút mở rộng video thu hẹp sidebar bên cạnh, đẩy player to ra giữa màn hình.

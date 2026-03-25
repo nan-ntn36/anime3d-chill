@@ -11,6 +11,8 @@
   border-radius: var(--radius-lg);
   overflow: hidden;
   user-select: none;
+  box-shadow: 0 0 50px rgba(234, 179, 8, 0.2); /* Ambient glow */
+  border: 1px solid rgba(234, 179, 8, 0.15);
 }
 
 .movie-player--theater {
@@ -66,20 +68,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(108, 92, 231, 0.85);
+  background: rgba(234, 179, 8, 0.85);
   border: none;
   border-radius: 50%;
-  color: white;
+  color: #000;
   font-size: 1.5rem;
   cursor: pointer;
   transition: all var(--transition-base);
-  box-shadow: 0 0 30px rgba(108, 92, 231, 0.5);
+  box-shadow: 0 0 30px rgba(234, 179, 8, 0.5);
   backdrop-filter: blur(4px);
 }
 
 .movie-player__center-play:hover {
   transform: translate(-50%, -50%) scale(1.1);
-  background: rgba(108, 92, 231, 1);
+  background: rgba(234, 179, 8, 1);
 }
 
 /* ── Progress Bar ────────────────────────────────────────── */
@@ -116,7 +118,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--color-accent-gradient);
+  background: var(--color-accent);
   border-radius: 2px;
 }
 
@@ -127,9 +129,9 @@
   transform: translateY(-50%);
   width: 12px;
   height: 12px;
-  background: white;
+  background: #fff;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(108, 92, 231, 0.6);
+  box-shadow: 0 0 8px rgba(234, 179, 8, 0.8);
   opacity: 0;
   transition: opacity var(--transition-fast);
 }
@@ -470,10 +472,10 @@
 }
 
 .player-page__ep-btn--active {
-  color: white;
+  color: #000;
   background: var(--color-accent);
   border-color: var(--color-accent);
-  box-shadow: 0 0 12px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.4);
   pointer-events: none;
 }
 

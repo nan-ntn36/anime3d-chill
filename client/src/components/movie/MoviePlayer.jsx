@@ -206,21 +206,6 @@ export default function MoviePlayer({ m3u8Url, embedUrl, onEnded, onProgress80, 
             border: 'none',
           }}
         />
-        {m3u8Url && (
-          <div className="movie-player__embed-notice">
-            <button
-              className="btn btn-sm"
-              onClick={() => {
-                setUseEmbed(false);
-                setLoadError(null);
-                window.__playerLoadStart = Date.now();
-              }}
-              style={{ opacity: 0.7, fontSize: '0.75rem' }}
-            >
-              🔄 Thử nguồn trực tiếp
-            </button>
-          </div>
-        )}
       </div>
     );
   }

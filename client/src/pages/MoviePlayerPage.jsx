@@ -11,6 +11,8 @@ import { useMovieDetail } from '@/hooks/useMovies';
 import usePlayerStore from '@/store/playerStore';
 import MoviePlayer from '@/components/movie/MoviePlayer';
 import PlayerErrorBoundary from '@/components/movie/PlayerErrorBoundary';
+import CommentSection from '@/components/movie/CommentSection';
+import RankingSidebar from '@/components/home/RankingSidebar';
 
 /**
  * Strip HTML tags
@@ -213,7 +215,16 @@ export default function MoviePlayerPage() {
                 </button>
               ))}
             </div>
+
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <RankingSidebar title="BXH TUẦN" />
+            </div>
           </aside>
+        </div>
+        
+        {/* Comments Section */}
+        <div className="player-page__comments" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--space-4)', width: '100%' }}>
+          <CommentSection />
         </div>
       </div>
     </>

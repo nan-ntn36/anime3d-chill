@@ -1,29 +1,9 @@
-/**
- * HeroBanner — Full-screen hero carousel (rophim-style)
- * Shows featured movies with poster background, metadata, and thumbnail nav
- */
-
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlay, FiInfo } from 'react-icons/fi';
-import { SkeletonCard } from '@components/ui/Skeleton';
+import { FiPlay, FiBookmark } from 'react-icons/fi';
 import './HeroBanner.css';
 
 const AUTO_ROTATE_MS = 6000;
-const PARTICLE_COUNT = 20;
-
-/** Generate CSS particle data once */
-function generateParticles(count) {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${100 + Math.random() * 20}%`,
-    size: 2 + Math.random() * 3,
-    delay: Math.random() * 15,
-    duration: 10 + Math.random() * 15,
-    opacity: 0.15 + Math.random() * 0.35,
-  }));
-}
 
 export default function HeroBanner({ movies = [], loading = false }) {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -31,11 +11,7 @@ export default function HeroBanner({ movies = [], loading = false }) {
   const timerRef = useRef(null);
   const progressRef = useRef(null);
 
-  // CSS particles (memoized)
-  const particles = useMemo(() => generateParticles(PARTICLE_COUNT), []);
-
-  // Limit to first 8 movies
-  const slides = movies.slice(0, 8);
+  const slides = movies.slice(0, 6);
 
   const goTo = useCallback((index) => {
     setActiveIndex(index);
@@ -64,21 +40,20 @@ export default function HeroBanner({ movies = [], loading = false }) {
     };
   }, [activeIndex, slides.length]);
 
-  // Loading state
+  // Loading skeleton
   if (loading) {
     return (
       <div className="hero-banner hero-banner--loading">
-        <div className="hero-banner__skeleton-content">
-          <div className="skeleton" style={{ width: '60%', height: 40, marginBottom: 12 }} />
-          <div className="skeleton" style={{ width: '30%', height: 20, marginBottom: 16 }} />
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            <div className="skeleton" style={{ width: 60, height: 28 }} />
-            <div className="skeleton" style={{ width: 70, height: 28 }} />
-            <div className="skeleton" style={{ width: 50, height: 28 }} />
+        <div className="hero-banner__skeleton">
+          <div className="skeleton" style={{ width: 140, height: 24, marginBottom: 12, borderRadius: 20 }} />
+          <div className="skeleton" style={{ width: '50%', height: 48, marginBottom: 12 }} />
+          <div className="skeleton" style={{ width: '35%', height: 16, marginBottom: 16 }} />
+          <div className="skeleton" style={{ width: '40%', height: 14, marginBottom: 8 }} />
+          <div className="skeleton" style={{ width: '35%', height: 14, marginBottom: 24 }} />
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div className="skeleton" style={{ width: 160, height: 48, borderRadius: 9999 }} />
+            <div className="skeleton" style={{ width: 140, height: 48, borderRadius: 9999 }} />
           </div>
-          <div className="skeleton" style={{ width: '50%', height: 14, marginBottom: 8 }} />
-          <div className="skeleton" style={{ width: '40%', height: 14, marginBottom: 24 }} />
-          <div className="skeleton" style={{ width: 160, height: 44, borderRadius: 9999 }} />
         </div>
       </div>
     );
@@ -88,33 +63,18 @@ export default function HeroBanner({ movies = [], loading = false }) {
 
   return (
     <div className="hero-banner">
-      {/* CSS Particles */}
-      <div className="hero-banner__particles">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="hero-banner__particle"
-            style={{
-              left: p.left,
-              top: p.top,
-              width: p.size,
-              height: p.size,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.duration}s`,
-              opacity: p.opacity,
-            }}
-          />
-        ))}
-      </div>
-
       {slides.map((movie, index) => {
-        const bgImage = movie.poster || movie.thumb || '';
+        const bgImage = movie.thumb || movie.poster || '';
+        const rawDesc = movie.content
+          ? movie.content.replace(/<[^>]*>?/gm, '').substring(0, 180)
+          : '';
+        const desc = rawDesc || `Trải nghiệm thế giới Anime đầy kịch tính với siêu phẩm "${movie.title}". Chất lượng hình ảnh 4K sắc nét và đường truyền cực kỳ ổn định tại Anime-3D.`;
+
         return (
           <div
             key={movie.slug || index}
             className={`hero-banner__slide ${index === activeIndex ? 'hero-banner__slide--active' : ''}`}
           >
-            {/* Background */}
             {bgImage && (
               <img
                 className="hero-banner__bg"
@@ -126,94 +86,71 @@ export default function HeroBanner({ movies = [], loading = false }) {
             )}
             <div className="hero-banner__overlay" />
 
-            {/* Content */}
-            <div className="hero-banner__content">
-              <h1 className="hero-banner__title">{movie.title}</h1>
-
-              {movie.originName && (
-                <p className="hero-banner__origin-name">{movie.originName}</p>
-              )}
-
-              {/* Badges */}
-              <div className="hero-banner__badges">
-                {movie.year && <span className="hero-banner__badge">{movie.year}</span>}
-                {movie.quality && <span className="hero-banner__badge">{movie.quality}</span>}
-                {movie.language && <span className="hero-banner__badge">{movie.language}</span>}
-                {movie.currentEpisode && <span className="hero-banner__badge">{movie.currentEpisode}</span>}
+            {/* Content — left side */}
+            <div className="hero-banner__content container">
+              <div className="hero-banner__tag-row">
+                <span className="hero-banner__tag">🔥 ANIME TRENDING</span>
+                <div className="hero-banner__meta-line">
+                  {movie.year && <span>{movie.year}</span>}
+                  {movie.currentEpisode && <><span className="hero-banner__meta-dot">•</span><span>{movie.currentEpisode}</span></>}
+                </div>
               </div>
 
-              {/* Genres */}
-              {movie.genres?.length > 0 && (
-                <div className="hero-banner__genres">
-                  {movie.genres.slice(0, 4).map((genre) => {
-                    const genreSlug = typeof genre === 'object' ? genre.slug : genre.toLowerCase().replace(/\s+/g, '-');
-                    const genreName = typeof genre === 'object' ? genre.name : genre;
-                    return (
-                      <Link
-                        key={genreSlug}
-                        to={`/the-loai/${genreSlug}`}
-                        className="hero-banner__genre"
-                      >
-                        {genreName}
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
+              <h1 className="hero-banner__title">{movie.title}</h1>
 
-              {/* Description */}
-              {movie.content && (
-                <p
-                  className="hero-banner__desc"
-                  dangerouslySetInnerHTML={{
-                    __html: movie.content.replace(/<[^>]*>/g, '').slice(0, 200),
-                  }}
-                />
-              )}
+              {desc && <p className="hero-banner__desc">{desc}</p>}
 
-              {/* Actions */}
               <div className="hero-banner__actions">
-                <Link to={`/phim/${movie.slug}`} className="hero-banner__play-btn">
-                  <FiPlay /> Xem Phim
+                <Link to={`/phim/${movie.slug}`} className="hero-banner__btn-primary">
+                  <FiPlay /> XEM NGAY
                 </Link>
-                <Link to={`/phim/${movie.slug}`} className="hero-banner__icon-btn" title="Chi tiết">
-                  <FiInfo />
-                </Link>
+                <button className="hero-banner__btn-secondary">
+                  <FiBookmark /> LƯU LẠI
+                </button>
               </div>
             </div>
           </div>
         );
       })}
 
-      {/* Thumbnail nav */}
+      {/* Thumbnail Navigation — bottom-right, vertical poster style */}
       {slides.length > 1 && (
-        <div className="hero-banner__thumbs">
-          {slides.map((movie, index) => (
-            <button
-              key={movie.slug || index}
-              className={`hero-banner__thumb ${index === activeIndex ? 'hero-banner__thumb--active' : ''}`}
-              onClick={() => goTo(index)}
-              aria-label={`Xem ${movie.title}`}
-            >
-              <img
-                src={movie.thumb || movie.poster || '/placeholder-poster.svg'}
-                alt={movie.title}
-                loading="lazy"
-                referrerPolicy="no-referrer"
-              />
-            </button>
-          ))}
-        </div>
-      )}
+        <>
+          <div className="hero-banner__thumbs">
+            {slides.map((movie, index) => (
+              <button
+                key={movie.slug || index}
+                className={`hero-banner__thumb ${index === activeIndex ? 'hero-banner__thumb--active' : ''}`}
+                onClick={() => goTo(index)}
+                aria-label={`Xem ${movie.title}`}
+              >
+                <img
+                  src={movie.poster || movie.thumb || '/placeholder-poster.svg'}
+                  alt={movie.title}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </button>
+            ))}
+          </div>
 
-      {/* Progress bar */}
-      {slides.length > 1 && (
-        <div className="hero-banner__progress">
-          <div
-            className="hero-banner__progress-bar"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+          {/* Progress indicators — horizontal below thumbnails */}
+          <div className="hero-banner__indicators">
+            {slides.map((_, index) => (
+              <div
+                key={index}
+                className={`hero-banner__indicator ${index === activeIndex ? 'hero-banner__indicator--active' : ''}`}
+              >
+                <div
+                  className="hero-banner__indicator-fill"
+                  style={{
+                    width: index === activeIndex ? `${progress}%` : index < activeIndex ? '100%' : '0%'
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

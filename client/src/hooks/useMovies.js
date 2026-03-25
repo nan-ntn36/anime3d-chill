@@ -17,7 +17,19 @@ export function useNewMovies(page = 1) {
   return useQuery({
     queryKey: ['movies', 'new', page],
     queryFn: () => movieApi.getNew(page).then((r) => r.data.data),
-    staleTime: 5 * 60 * 1000,     // 5 phút (khớp cache backend)
+    staleTime: 5 * 60 * 1000,
+    placeholderData: (prev) => prev,
+  });
+}
+
+/**
+ * Tất cả phim (AllPhim / ThungPhim)
+ */
+export function useAllMovies(page = 1) {
+  return useQuery({
+    queryKey: ['movies', 'all', page],
+    queryFn: () => movieApi.getAll(page).then((r) => r.data.data),
+    staleTime: 5 * 60 * 1000,
     placeholderData: (prev) => prev,
   });
 }

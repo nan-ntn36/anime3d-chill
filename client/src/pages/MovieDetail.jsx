@@ -24,6 +24,8 @@ import toast from 'react-hot-toast';
 import { useMovieDetail } from '@/hooks/useMovies';
 import { useFavoriteToggle } from '@/hooks/useMovies';
 import useAuthStore from '@/store/authStore';
+import CommentSection from '@/components/movie/CommentSection';
+import RankingSidebar from '@/components/home/RankingSidebar';
 import './MovieDetail.css';
 
 /**
@@ -361,9 +363,11 @@ export default function MovieDetail() {
                 </div>
               </div>
             )}
+            
+            <CommentSection />
           </div>
 
-          {/* Right Column: Episodes */}
+          {/* Right Column: Episodes & Ranking */}
           <aside className="movie-detail__sidebar">
             <div className="movie-detail__episodes-panel">
               {/* Header + Server Selector */}
@@ -439,6 +443,10 @@ export default function MovieDetail() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <RankingSidebar title="BXH PHIM HOT" />
             </div>
           </aside>
         </div>

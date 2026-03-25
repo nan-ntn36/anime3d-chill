@@ -56,14 +56,17 @@ export default function Header() {
       <div className="header__inner container">
         {/* Logo */}
         <Link to="/" className="header__logo">
-          <span className="header__logo-icon">🎬</span>
-          <span className="header__logo-text text-gradient">Anime3D</span>
+          <span className="header__logo-icon" style={{ color: 'var(--color-accent)' }}>⚡</span>
+          <span className="header__logo-text" style={{ fontStyle: 'italic', fontWeight: 900, letterSpacing: '1px' }}>ANIME-3D</span>
         </Link>
 
         {/* Nav Links */}
         <nav className={`header__nav ${isMobileOpen ? 'header__nav--open' : ''}`}>
           <Link to="/" className="header__link" onClick={() => setIsMobileOpen(false)}>
             Trang Chủ
+          </Link>
+          <Link to="/thung-phim" className="header__link" onClick={() => setIsMobileOpen(false)}>
+            ThungPhim
           </Link>
           <Link to="/phim-moi" className="header__link" onClick={() => setIsMobileOpen(false)}>
             Phim Mới
