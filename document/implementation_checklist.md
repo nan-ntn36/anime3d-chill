@@ -318,20 +318,20 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 12 · Watch Progress — Guest & User Mode
 
 **Module: Watch Progress Service**
-- [ ] `src/services/watchProgressService.js`:
-  - [ ] `saveProgress()` — lưu vào localStorage (guest) hoặc server (user)
-  - [ ] `loadProgress()` — đọc từ localStorage hoặc server
-  - [ ] `shouldSaveProgress()` — chỉ lưu khi xem > 30s, chưa kết thúc
-  - [ ] Debounce 15 giây
-  - [ ] Events: pause, beforeunload, visibilitychange, chuyển tập
+- [x] `src/services/watchProgressService.js`:
+  - [x] `saveProgress()` — lưu vào localStorage (guest) hoặc server (user)
+  - [x] `loadProgress()` — đọc từ localStorage hoặc server
+  - [x] `shouldSaveProgress()` — chỉ lưu khi xem > 30s, chưa kết thúc
+  - [x] Debounce 15 giây
+  - [x] Events: pause, beforeunload, visibilitychange, chuyển tập
 
 **Module: Guest Session**
-- [ ] `src/services/guestId.js` — tạo/quản lý `anime3d_session_id` trong localStorage
+- [x] `src/services/guestId.js` — tạo/quản lý `anime3d_session_id` trong localStorage
 
 **Module: History Sync**
-- [ ] Backend `POST /api/v1/me/history/sync` — nhận batch, upsert idempotent
-- [ ] Frontend merge logic: so sánh `updatedAt` → giữ bản mới hơn
-- [ ] Sau khi merge → xóa localStorage đã sync
+- [x] Backend `POST /api/v1/me/history/sync` — nhận batch, upsert idempotent
+- [x] Frontend merge logic: so sánh `updatedAt` → giữ bản mới hơn
+- [x] Sau khi merge → xóa localStorage đã sync
 
 ---
 

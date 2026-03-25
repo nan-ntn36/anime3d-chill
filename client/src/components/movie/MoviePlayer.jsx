@@ -27,9 +27,9 @@ function formatTime(sec) {
 
 /**
  * MoviePlayer Component
- * @param {{ m3u8Url: string, onEnded?: () => void, onProgress80?: () => void, onSwitchServer?: () => void }} props
+ * @param {{ m3u8Url: string, embedUrl?: string, startTime?: number, onEnded?: () => void, onProgress80?: () => void, onSwitchServer?: () => void }} props
  */
-export default function MoviePlayer({ m3u8Url, embedUrl, onEnded, onProgress80, onSwitchServer }) {
+export default function MoviePlayer({ m3u8Url, embedUrl, startTime, onEnded, onProgress80, onSwitchServer }) {
   const containerRef = useRef(null);
   const progressRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -39,7 +39,7 @@ export default function MoviePlayer({ m3u8Url, embedUrl, onEnded, onProgress80, 
     volume, isMuted,
     togglePlay, seek, toggleFullscreen, toggleMute,
     handleKeyDown, retry, changeVolume,
-  } = usePlayer(m3u8Url, { onEnded, onProgress80 });
+  } = usePlayer(m3u8Url, { startTime, onEnded, onProgress80 });
 
   const { currentTime, duration, isFullscreen, isTheaterMode, toggleTheaterMode } = usePlayerStore();
   const [controlsVisible, setControlsVisible] = useState(true);

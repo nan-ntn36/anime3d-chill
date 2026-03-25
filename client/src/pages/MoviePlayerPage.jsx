@@ -3,7 +3,7 @@
  * Page wrapper: player + episode sidebar + movie info
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { FiMonitor, FiChevronRight } from 'react-icons/fi';
@@ -13,6 +13,7 @@ import MoviePlayer from '@/components/movie/MoviePlayer';
 import PlayerErrorBoundary from '@/components/movie/PlayerErrorBoundary';
 import CommentSection from '@/components/movie/CommentSection';
 import RankingSidebar from '@/components/home/RankingSidebar';
+import { saveProgress, getProgress } from '@/services/watchProgressService';
 
 /**
  * Strip HTML tags
@@ -56,6 +57,54 @@ export default function MoviePlayerPage() {
   // m3u8 URL and embed URL for current episode
   const m3u8Url = currentEp?.m3u8Url || '';
   const embedUrl = currentEp?.embedUrl || '';
+
+  // ── Watch Progress ───────────────────────────────────────
+  const { currentTime, duration } = usePlayerStore();
+  const lastSavedTime = useRef(0);
+
+  // Lấy startTime khi load phim
+  const startTime = useMemo(() => {
+    if (!movie || !currentEp) return 0;
+    const progress = getProgress(movie.slug, currentEp.slug);
+    return progress?.currentTime || 0;
+  }, [movie, currentEp]);
+
+  // Lưu tiến độ định kỳ (Mỗi 15s hoặc khi gần hết video)
+  useEffect(() => {
+    if (!movie || !currentEp) return;
+    
+    // Lưu khi currentTime chênh lệch so với lần cuối lưu lớn hơn 15s hoặc video sắp hết.
+    if (Math.abs(currentTime - lastSavedTime.current) >= 15 || (duration > 0 && duration - currentTime < 2)) {
+      saveProgress({
+        movieSlug: movie.slug,
+        movieName: movie.title,
+        movieThumb: movie.thumb || movie.poster,
+        episode: currentEp.slug,
+        serverName: currentServer?.serverName || 'V.I.P',
+        currentTime,
+        duration,
+      });
+      lastSavedTime.current = currentTime;
+    }
+  }, [currentTime, duration, movie, currentEp, currentServer]);
+
+  // Lưu tiến độ lần cuối khi đổi tập hoặc thoát trang
+  useEffect(() => {
+    return () => {
+      const state = usePlayerStore.getState();
+      if (movie && currentEp && state.currentTime > 30) {
+        saveProgress({
+          movieSlug: movie.slug,
+          movieName: movie.title,
+          movieThumb: movie.thumb || movie.poster,
+          episode: currentEp.slug,
+          serverName: currentServer?.serverName || 'V.I.P',
+          currentTime: state.currentTime,
+          duration: state.duration,
+        });
+      }
+    };
+  }, [movie, currentEp, currentServer]);
 
   // ── Episode navigation ─────────────────────────────────
   const currentEpIndex = currentEpisodes.findIndex((ep) => ep.slug === currentEp?.slug);
@@ -138,6 +187,7 @@ export default function MoviePlayerPage() {
             <MoviePlayer
               m3u8Url={m3u8Url}
               embedUrl={embedUrl}
+              startTime={startTime}
               onEnded={handleNextEpisode}
               onProgress80={handleProgress80}
               onSwitchServer={episodes.length > 1 ? handleSwitchServer : undefined}

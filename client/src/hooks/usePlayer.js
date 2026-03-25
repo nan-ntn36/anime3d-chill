@@ -51,6 +51,12 @@ export default function usePlayer(m3u8Url, options = {}) {
     // Safari native HLS fallback
     if (video.canPlayType('application/vnd.apple.mpegurl') && !Hls.isSupported()) {
       video.src = m3u8Url;
+      video.addEventListener('loadedmetadata', function onLoaded() {
+        if (options.startTime > 0) {
+          video.currentTime = Math.max(0, options.startTime - 5);
+        }
+        video.removeEventListener('loadedmetadata', onLoaded);
+      });
       setIsReady(true);
       setBuffering(false);
       return;
@@ -82,6 +88,9 @@ export default function usePlayer(m3u8Url, options = {}) {
       setIsReady(true);
       isReadyRef.current = true;
       setBuffering(false);
+      if (options.startTime > 0 && video) {
+        video.currentTime = Math.max(0, options.startTime - 5); // Lùi 5s để dễ nắm bắt mạch phim
+      }
     });
 
     hls.on(Hls.Events.ERROR, (_event, data) => {
