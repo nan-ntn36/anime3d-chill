@@ -7,6 +7,8 @@ import AppLayout from '@components/layout/AppLayout';
  */
 const Home = lazy(() => import('@pages/Home'));
 const ThungPhim = lazy(() => import('@pages/ThungPhim'));
+const SearchPage = lazy(() => import('@pages/SearchPage'));
+const MovieListPage = lazy(() => import('@pages/MovieListPage'));
 const Login = lazy(() => import('@pages/Login'));
 const MovieDetail = lazy(() => import('@pages/MovieDetail'));
 const MoviePlayerPage = lazy(() => import('@pages/MoviePlayerPage'));
@@ -55,9 +57,11 @@ export default function App() {
           <Route path="/all-phim" element={<Home />} />
           <Route path="/thung-phim" element={<ThungPhim />} />
           <Route path="/phim-moi" element={<Home />} />
-          <Route path="/the-loai" element={<Home />} />
-          <Route path="/quoc-gia" element={<Home />} />
-          <Route path="/tim-kiem" element={<Home />} />
+          <Route path="/the-loai" element={<MovieListPage />} />
+          <Route path="/the-loai/:slug" element={<MovieListPage />} />
+          <Route path="/quoc-gia" element={<MovieListPage />} />
+          <Route path="/quoc-gia/:slug" element={<MovieListPage />} />
+          <Route path="/tim-kiem" element={<SearchPage />} />
           <Route path="/phim/:slug" element={<MovieDetail />} />
           <Route path="/phim/:slug/xem" element={<MoviePlayerPage />} />
           <Route path="/dang-nhap" element={<Login />} />

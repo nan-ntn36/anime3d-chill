@@ -98,6 +98,41 @@ export function useSearchMovies(keyword, page = 1) {
   });
 }
 
+/**
+ * Phim theo năm
+ */
+export function useMoviesByYear(year, page = 1) {
+  return useQuery({
+    queryKey: ['movies', 'year', year, page],
+    queryFn: () => movieApi.getByYear(year, page).then((r) => r.data.data),
+    staleTime: 15 * 60 * 1000,
+    enabled: !!year,
+    placeholderData: (prev) => prev,
+  });
+}
+
+/**
+ * Danh sách thể loại + thumbnail
+ */
+export function useGenres() {
+  return useQuery({
+    queryKey: ['categories', 'genres'],
+    queryFn: () => movieApi.getGenres().then((r) => r.data.data),
+    staleTime: 60 * 60 * 1000, // 1 giờ
+  });
+}
+
+/**
+ * Danh sách quốc gia + thumbnail
+ */
+export function useCountries() {
+  return useQuery({
+    queryKey: ['categories', 'countries'],
+    queryFn: () => movieApi.getCountries().then((r) => r.data.data),
+    staleTime: 60 * 60 * 1000,
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════
    Favorite Toggle Hook — Day 9
    ═══════════════════════════════════════════════════════════ */

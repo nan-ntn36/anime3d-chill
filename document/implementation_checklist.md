@@ -357,14 +357,14 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 14 · Tìm Kiếm
 
 **Module: Search**
-- [ ] `src/pages/SearchPage.jsx`:
-  - [ ] Ô tìm kiếm với debounce input
-  - [ ] Kết quả grid (MovieGrid)
-  - [ ] Phân trang
-  - [ ] Loading/empty/error states
-  - [ ] Fallback: "Không thể tìm kiếm" → gợi ý duyệt theo thể loại
-- [ ] `src/pages/MovieListPage.jsx` — danh sách theo thể loại/quốc gia/năm
-- [ ] `src/components/ui/TopicCard.jsx` — card cho thể loại/quốc gia
+- [x] `src/pages/SearchPage.jsx`:
+  - [x] Ô tìm kiếm với debounce input
+  - [x] Kết quả grid (MovieGrid)
+  - [x] Phân trang
+  - [x] Loading/empty/error states
+  - [x] Fallback: "Không thể tìm kiếm" → gợi ý duyệt theo thể loại
+- [x] `src/pages/MovieListPage.jsx` — danh sách theo thể loại/quốc gia/năm
+- [x] `src/components/ui/TopicCard.jsx` — card cho thể loại/quốc gia
 
 ---
 

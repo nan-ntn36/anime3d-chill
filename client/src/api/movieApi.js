@@ -46,6 +46,16 @@ const movieApi = {
    * Tất cả phim (AllPhim / ThungPhim)
    */
   getAll: (page = 1) => api.get('/movies/all', { params: { page } }),
+
+  /**
+   * Danh sách thể loại + thumbnail
+   */
+  getGenres: () => api.get('/movies/genres'),
+
+  /**
+   * Danh sách quốc gia + thumbnail
+   */
+  getCountries: () => api.get('/movies/countries'),
 };
 
 export default movieApi;

@@ -248,4 +248,28 @@ router.get('/year/:year', [...validateYear, ...validatePage], movieController.ge
  */
 router.get('/search', validateSearch, movieController.searchMovies);
 
+/**
+ * @swagger
+ * /api/v1/movies/genres:
+ *   get:
+ *     summary: Danh sách thể loại + thumbnail
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Danh sách thể loại với thumbnail đại diện
+ */
+router.get('/genres', movieController.getGenres);
+
+/**
+ * @swagger
+ * /api/v1/movies/countries:
+ *   get:
+ *     summary: Danh sách quốc gia + thumbnail
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Danh sách quốc gia với thumbnail đại diện
+ */
+router.get('/countries', movieController.getCountries);
+
 module.exports = router;

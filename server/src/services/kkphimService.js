@@ -28,6 +28,7 @@ const TTL = {
   COUNTRY:  15 * 60,
   YEAR:     15 * 60,
   SEARCH:   3 * 60,      // 3 phút
+  CATEGORIES: 60 * 60,   // 1 giờ — danh sách thể loại/quốc gia ít thay đổi
 };
 
 // ── Circuit Breaker ─────────────────────────────────────────
@@ -261,6 +262,74 @@ async function searchMovies(keyword, page = 1) {
   );
 }
 
+/**
+ * Danh sách thể loại + thumbnail đại diện
+ * KKPhim: GET /the-loai (list) + GET /v1/api/the-loai/{slug}?page=1 (thumbnail)
+ */
+async function getGenres() {
+  const cacheKey = 'categories:genres';
+  const cached = await cacheGet(cacheKey);
+  if (cached) return cached;
+
+  // Lấy danh sách thể loại
+  const rawList = await fetchFromKKPhim('/the-loai');
+  
+  // Lấy thumbnail cho mỗi thể loại (song song, giới hạn concurrency)
+  const withThumbs = await Promise.all(
+    rawList.map(async (genre) => {
+      try {
+        const moviesData = await fetchFromKKPhim(`/v1/api/the-loai/${genre.slug}?page=1`);
+        const firstMovie = moviesData?.data?.items?.[0];
+        return {
+          name: genre.name,
+          slug: genre.slug,
+          thumb: firstMovie
+            ? `https://phimimg.com/${firstMovie.thumb_url}`
+            : null,
+        };
+      } catch {
+        return { name: genre.name, slug: genre.slug, thumb: null };
+      }
+    })
+  );
+
+  cacheSet(cacheKey, withThumbs, TTL.CATEGORIES).catch(() => {});
+  return withThumbs;
+}
+
+/**
+ * Danh sách quốc gia + thumbnail đại diện
+ * KKPhim: GET /quoc-gia (list) + GET /v1/api/quoc-gia/{slug}?page=1 (thumbnail)
+ */
+async function getCountries() {
+  const cacheKey = 'categories:countries';
+  const cached = await cacheGet(cacheKey);
+  if (cached) return cached;
+
+  const rawList = await fetchFromKKPhim('/quoc-gia');
+
+  const withThumbs = await Promise.all(
+    rawList.map(async (country) => {
+      try {
+        const moviesData = await fetchFromKKPhim(`/v1/api/quoc-gia/${country.slug}?page=1`);
+        const firstMovie = moviesData?.data?.items?.[0];
+        return {
+          name: country.name,
+          slug: country.slug,
+          thumb: firstMovie
+            ? `https://phimimg.com/${firstMovie.thumb_url}`
+            : null,
+        };
+      } catch {
+        return { name: country.name, slug: country.slug, thumb: null };
+      }
+    })
+  );
+
+  cacheSet(cacheKey, withThumbs, TTL.CATEGORIES).catch(() => {});
+  return withThumbs;
+}
+
 module.exports = {
   getNewMovies,
   getAllMovies,
@@ -270,4 +339,6 @@ module.exports = {
   getByCountry,
   getByYear,
   searchMovies,
+  getGenres,
+  getCountries,
 };

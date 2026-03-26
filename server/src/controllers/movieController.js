@@ -154,6 +154,32 @@ async function searchMovies(req, res, next) {
   }
 }
 
+/**
+ * GET /movies/genres
+ * Danh sách thể loại + thumbnail
+ */
+async function getGenres(req, res, next) {
+  try {
+    const data = await kkphimService.getGenres();
+    sendSuccess(res, data);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * GET /movies/countries
+ * Danh sách quốc gia + thumbnail
+ */
+async function getCountries(req, res, next) {
+  try {
+    const data = await kkphimService.getCountries();
+    sendSuccess(res, data);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getNewMovies,
   getAllMovies,
@@ -163,4 +189,6 @@ module.exports = {
   getByCountry,
   getByYear,
   searchMovies,
+  getGenres,
+  getCountries,
 };
