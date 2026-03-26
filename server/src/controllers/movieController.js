@@ -97,7 +97,7 @@ async function getByGenre(req, res, next) {
   try {
     checkValidation(req);
     const { slug } = req.params;
-    const page = parseInt(req.query.page, 10) || 1;
+    const page = parseInt(req.query.page, 12) || 1;
     const data = await kkphimService.getByGenre(slug, page);
     sendSuccess(res, data, { page, slug });
   } catch (error) {
@@ -113,7 +113,7 @@ async function getByCountry(req, res, next) {
   try {
     checkValidation(req);
     const { slug } = req.params;
-    const page = parseInt(req.query.page, 10) || 1;
+    const page = parseInt(req.query.page, 12) || 1;
     const data = await kkphimService.getByCountry(slug, page);
     sendSuccess(res, data, { page, slug });
   } catch (error) {
