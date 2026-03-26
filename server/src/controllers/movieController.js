@@ -8,6 +8,9 @@ const kkphimService = require('../services/kkphimService');
 const { sendSuccess } = require('../utils/response');
 const { validationResult } = require('express-validator');
 const { AppError } = require('../middleware/errorHandler');
+const { MovieView } = require('../models');
+const { Op } = require('sequelize');
+const logger = require('../utils/logger');
 
 /**
  * Helper: kiểm tra validation errors
@@ -180,6 +183,62 @@ async function getCountries(req, res, next) {
   }
 }
 
+/**
+ * POST /movies/view
+ * Ghi nhận lượt xem phim (analytics)
+ * Endpoint công khai — không cần auth, dùng sessionId cho guest
+ * Deduplicate: 1 view / phim / session / ngày
+ */
+async function recordView(req, res, next) {
+  try {
+    const { movieSlug, sessionId } = req.body;
+
+    if (!movieSlug) {
+      return next(new AppError('movieSlug là bắt buộc', 400, 'VALIDATION_ERROR'));
+    }
+
+    // userId từ JWT nếu có (optional auth middleware đã parse)
+    const userId = req.user?.id || null;
+    const sid = sessionId || null;
+
+    // Deduplicate: chỉ ghi 1 view / phim / session (hoặc user) / ngày
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const where = {
+      movieSlug,
+      viewedAt: { [Op.gte]: today },
+    };
+
+    if (userId) {
+      where.userId = userId;
+    } else if (sid) {
+      where.sessionId = sid;
+    } else {
+      // Không có cách phân biệt → skip deduplicate, luôn ghi
+    }
+
+    // Kiểm tra đã view hôm nay chưa
+    if (userId || sid) {
+      const existing = await MovieView.findOne({ where });
+      if (existing) {
+        return res.status(200).json({ success: true, message: 'Đã ghi nhận' });
+      }
+    }
+
+    await MovieView.create({
+      movieSlug,
+      userId,
+      sessionId: sid,
+    });
+
+    res.status(201).json({ success: true, message: 'Đã ghi nhận lượt xem' });
+  } catch (error) {
+    logger.error(`[MovieController.recordView] Error: ${error.message}`);
+    next(error);
+  }
+}
+
 module.exports = {
   getNewMovies,
   getAllMovies,
@@ -191,4 +250,5 @@ module.exports = {
   searchMovies,
   getGenres,
   getCountries,
+  recordView,
 };

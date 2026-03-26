@@ -1,40 +1,89 @@
-# Hướng dẫn chạy Ngày 12: Watch Progress (Đồng bộ thời gian xem phim)
+# Hướng dẫn chạy Ngày 12: Watch Progress & History
 
-## Yêu cầu phần mềm
-- Backend chạy MySQL, Node.js (`npm run dev:server`).
-- Frontend Vite `npm run dev:client`.
-- Đã config đúng đường dẫn API KKPhim và database.
+## Yêu cầu
 
-## Từng bước chạy & Kiểm tra kết quả
+- Docker đang chạy (`docker compose up --build`)
+- MySQL + Redis đã khởi tạo, bảng `watch_history` đã migration sẵn từ Phase 1
+- Frontend và Backend đang hoạt động tại `localhost:3000` và `localhost:5000`
 
-### 1. Kịch bản Khách (Guest)
-1. Mở trình duyệt ẩn danh vào localhost.
-2. Mở vào một phim bất kỳ, bấm **Phát**.
-3. Xem trên 30s, hoặc tua nhanh thanh thời gian (progress bar) đến phút thứ 10. Chờ 15s để hệ thống kích hoạt tự động lưu (auto-save).
-4. F5 tải lại trang.
-5. **Kỳ vọng:** Video player sẽ tự động `seek` đến phút thứ 10 (thực tế lùi lại 5s là `09:55` để khán giả dễ định hình bối cảnh).
-6. Khách đóng trình duyệt mở lại, localStorage giữ mốc thời gian đó cho tập phim đã xem. Dữ liệu lưu trong biến localStorage: `anime3d_watch_progress`.
+## Kịch bản kiểm thử
+
+### 1. Kịch bản Khách (Guest — Không đăng nhập)
+
+1. Mở trình duyệt ẩn danh → `http://localhost:3000`
+2. Chọn phim bất kỳ → Vào **Xem phim**
+3. **Nếu m3u8 mode** (video custom controls): Xem trên 30s hoặc tua đến phút 10. Chờ ≥15s để auto-save kích hoạt.
+4. **Nếu embed mode** (iframe player): Lịch sử "đã xem" được ghi ngay khi mở tập → kiểm tra localStorage.
+5. Mở DevTools → Application → Local Storage → tìm key `anime3d_watch_progress`
+
+**Kỳ vọng:**
+- Thấy record có format: `{ movieSlug: "...", episode: "...", currentTime: X, duration: Y }`
+- Với embed mode: `currentTime: 0, duration: 0` (chỉ ghi nhận visit)
+- Với m3u8 mode: `currentTime > 30, duration > 0`
+
+6. F5 tải lại trang (m3u8 mode):
+
+**Kỳ vọng:** Video tự seek đến mốc đã lưu trừ 5 giây (VD: lưu ở 10:00 → seek đến 9:55)
 
 ### 2. Kịch bản Đăng Nhập (Member/User)
-1. Đăng nhập một tài khoản (vd: `admin@anime3d.com`).
-2. Mở `/phim/slug-phim` và bật tập 1.
-3. Tua lên phút 20. Chờ 15 giây hoặc bấm tạm dừng để API `POST /api/v1/me/history` được kích hoạt.
-4. Mở Tab Network trong DevTools xác nhận API trả về `200 OK` với body chứa `lastPositionSeconds`.
-5. Đổi trình duyệt (Sang Edge/Firefox hoặc Mobile) → Đăng nhập cùng tài khoản. 
-6. Mở lại phim → Xem trực tiếp từ phút 20 trên mọi thiết bị.
 
-### 3. Kịch bản Đồng bộ (Sync)
-- Khi một khách hàng xem ẩn danh tạo ra rất nhiều lịch sử ở LocalStorage, và sau đó họ đăng ký/đăng nhập.
-- Sau khi Login thành công, Web gọi hook `syncHistoryToServer()` đẩy cục mảng localStorage gọi lên `POST /api/v1/me/history/sync`.
-- Máy chủ sẽ upsert mảng lịch sử này vào DB (chỉ ghi đè nếu thời gian ở Local > thời gian đã có trong DB).
-- Kết quả: Không bị mất lịch sử khi tạo tài khoản mới.
+1. Đăng nhập tài khoản (VD: `admin@anime3d.com`)
+2. Mở phim → xem hoặc chỉ cần mở tập (embed mode)
+3. Mở DevTools → Network → lọc `history`
+
+**Kỳ vọng:**
+- Thấy request `POST /api/v1/me/history` trả `200 OK`
+- Response body chứa `data.movieSlug`, `data.lastPositionSeconds`, `data.watchedAt`
+
+4. Vào **Profile** → Tab **Lịch sử**
+
+**Kỳ vọng:**
+- Hiển thị phim vừa xem với poster thumbnail
+- Sắp xếp theo `watchedAt` (mới nhất đầu tiên)
+
+5. Đổi trình duyệt → Đăng nhập cùng tài khoản → Mở lại phim
+
+**Kỳ vọng:** Xem tiếp từ mốc đã lưu trên server (đồng bộ đa thiết bị)
+
+### 3. Kịch bản Đồng Bộ (Sync sau Login)
+
+1. Xem phim ẩn danh → tạo nhiều lịch sử trong localStorage
+2. Đăng ký / Đăng nhập tài khoản
+3. Mở DevTools → Network → tìm `POST /api/v1/me/history/sync`
+
+**Kỳ vọng:**
+- Request gửi: `{ items: [{movieSlug, episode, lastPositionSeconds, ...}, ...] }`
+- Response: `{ success: true, data: { syncedCount: N } }`
+- localStorage key `anime3d_watch_progress` bị xóa sau sync thành công
+- Vào Profile → Lịch sử → thấy toàn bộ phim đã xem khi ẩn danh
+
+## API Endpoints
+
+| Method | Endpoint | Body | Mô tả |
+|--------|----------|------|-------|
+| POST | `/api/v1/me/history` | `{ movieSlug, movieName, movieThumb, episode, serverName, duration, lastPositionSeconds }` | Lưu/cập nhật 1 record |
+| GET | `/api/v1/me/history?page=1` | — | Lấy lịch sử xem (phân trang, 20/page) |
+| POST | `/api/v1/me/history/sync` | `{ items: [...] }` | Đồng bộ batch từ localStorage |
 
 ## Troubleshooting
 
 | Lỗi | Nguyên nhân | Cách xử lý |
-|---|---|---|
-| Lỗi Upsert Duplicate Entry API `/history` | Bảng `watch_history` có index unique `(userId, movieSlug, episode)` nên nếu logic findAll rớt có thể bị `SQL_ERROR`. | Trong hàm `saveHistory`, ta đã sử dụng `findOrCreate` kèm `defaults` cập nhật biến đổi sau khối promise nên tuyệt đối an toàn. |
-| Video không tự lùi thời gian khi F5 | `MANIFEST_PARSED` event chưa gán startTime. | Đã cấu hình tại `usePlayer.js` nhận tham số `options.startTime` ở cả luồng HLS Native (Safari) và HLS.js. |
+|-----|-------------|------------|
+| Lịch sử trống dù đã xem phim | Player dùng embed mode → `saveProgress()` bị skip vì `currentTime ≤ 30` | Đã fix: `saveWatchVisit()` ghi nhận visit ngay cả embed mode |
+| `syncHistory` không đồng bộ dữ liệu | Frontend gửi `{ items }`, backend đọc `historyBatch` | Đã fix: backend đổi sang `const { items: historyBatch } = req.body` |
+| Video không tự seek khi F5 | `MANIFEST_PARSED` event chưa gán startTime | Đã cấu hình tại `usePlayer.js` nhận `options.startTime` ở cả HLS.js và Safari native |
+| Lỗi Upsert Duplicate Entry | Unique index `(userId, movieSlug, episode)` | Dùng `findOrCreate` + update nên an toàn |
+| Profile tab lịch sử không hiện | Chưa đăng nhập hoặc API lỗi | Kiểm tra token + Network tab |
 
-## Môi trường & Database
-Bảng `watch_history` đã migration sãn từ Phase 1. Không cần chạy gì thêm.
+## Các file liên quan
+
+| File | Vai trò |
+|------|---------|
+| `client/src/services/watchProgressService.js` | Core logic: saveProgress, saveWatchVisit, getProgress, syncHistory |
+| `client/src/pages/MoviePlayerPage.jsx` | Tích hợp timer + gọi save functions |
+| `client/src/api/userApi.js` | HTTP calls: saveHistory, getHistory, syncHistory |
+| `client/src/hooks/useAuth.js` | Gọi syncHistoryToServer sau login thành công |
+| `client/src/pages/Profile.jsx` | Hiển thị tab lịch sử xem + pagination |
+| `server/src/controllers/meController.js` | API handlers: saveHistory, getHistory, syncHistory |
+| `server/src/routes/v1/meRoutes.js` | Route definitions: /me/history |
+| `server/src/models/WatchHistory.js` | Sequelize ORM model |

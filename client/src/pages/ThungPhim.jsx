@@ -1,102 +1,123 @@
 /**
- * ThungPhimPage — Trang hiển thị tất cả phim bộ, phim lẻ (ngoại trừ hoạt hình)
+ * ThungPhimPage — Kho phim: tabs theo loại (Tất Cả, Phim Bộ, Phim Lẻ, Hoạt Hình, TV Shows)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useSearchParams } from 'react-router-dom';
 import MovieCard from '@components/movie/MovieCard';
+import Pagination from '@components/ui/Pagination';
 import ErrorFallback from '@components/common/ErrorFallback';
-import { useAllMovies } from '@/hooks/useMovies';
-import '../pages/Home.css';
+import { useAllMovies, useMoviesByList } from '@/hooks/useMovies';
+import './ThungPhim.css';
+
+const CATEGORIES = [
+  { slug: 'all',       label: 'Tất Cả',    icon: '🎬' },
+  { slug: 'phim-bo',   label: 'Phim Bộ',    icon: '📺' },
+  { slug: 'phim-le',   label: 'Phim Lẻ',    icon: '🎥' },
+  { slug: 'hoat-hinh', label: 'Hoạt Hình',  icon: '🎨' },
+  { slug: 'tv-shows',  label: 'TV Shows',   icon: '📡' },
+];
 
 export default function ThungPhimPage() {
-  const [page, setPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useAllMovies(page);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeSlug = searchParams.get('loai') || 'all';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+
+  const activeCategory = CATEGORIES.find(c => c.slug === activeSlug) || CATEGORIES[0];
+
+  // Fetch data dựa trên tab đang chọn
+  const allMovies = useAllMovies(activeSlug === 'all' ? page : 1);
+  const listMovies = useMoviesByList(activeSlug !== 'all' ? activeSlug : null, page);
+
+  const query = activeSlug === 'all' ? allMovies : listMovies;
+  const { data, isLoading, isError, refetch } = query;
 
   const movies = data?.items || [];
   const pagination = data?.pagination || {};
   const totalPages = pagination.totalPages || 1;
 
+  // Reset page khi đổi tab
+  const handleTabChange = (slug) => {
+    setSearchParams({ loai: slug, page: '1' });
+  };
+
+  const handlePageChange = (newPage) => {
+    setSearchParams({ loai: activeSlug, page: String(newPage) });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <Helmet>
-        <title>ThungPhim — Tất Cả Các Phim | Anime3D-Chill</title>
-        <meta name="description" content="Xem tất cả các thể loại phim: phim bộ, phim lẻ, hành động, tình cảm và nhiều hơn nữa." />
+        <title>{activeCategory.label} — ThungPhim | Anime3D-Chill</title>
+        <meta name="description" content={`Xem ${activeCategory.label}: phim bộ, phim lẻ, hoạt hình và nhiều thể loại khác tại Anime3D-Chill.`} />
       </Helmet>
 
-      <div className="home container" style={{ paddingTop: 'calc(var(--header-height) + var(--space-8))' }}>
-        <section className="home__section">
-          <h2 className="home__section-title">
-            <span className="home__section-icon">🎬</span>
-            <span className="home__section-title-text">THUNG PHIM — TẤT CẢ</span>
-          </h2>
+      <div className="thung-phim container">
+        {/* Header */}
+        <div className="thung-phim__header">
+          <h1 className="thung-phim__title">
+            <span className="thung-phim__title-icon">🎬</span>
+            Kho Phim
+          </h1>
+          <p className="thung-phim__subtitle">Khám phá hàng ngàn phim theo thể loại yêu thích</p>
+        </div>
 
+        {/* Category Tabs */}
+        <nav className="thung-phim__tabs" role="tablist">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.slug}
+              role="tab"
+              aria-selected={activeSlug === cat.slug}
+              className={`thung-phim__tab ${activeSlug === cat.slug ? 'thung-phim__tab--active' : ''}`}
+              onClick={() => handleTabChange(cat.slug)}
+            >
+              <span className="thung-phim__tab-icon">{cat.icon}</span>
+              {cat.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Content */}
+        <section className="thung-phim__content">
           {isError ? (
             <ErrorFallback
               message="Không thể tải danh sách phim"
               onRetry={() => refetch()}
             />
           ) : isLoading ? (
-            <div className="home__grid">
+            <div className="thung-phim__grid">
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="movie-card-container">
-                  <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-lg)' }} />
-                </div>
+                <div key={i} className="skeleton" style={{ aspectRatio: '2/3', borderRadius: 'var(--radius-lg)' }} />
               ))}
+            </div>
+          ) : movies.length === 0 ? (
+            <div className="thung-phim__empty">
+              <span className="thung-phim__empty-icon">🔍</span>
+              <p>Không tìm thấy phim nào trong mục này</p>
             </div>
           ) : (
             <>
-              <div className="home__grid">
+              {/* Movie Count */}
+              <p className="thung-phim__count">
+                {activeCategory.icon} {activeCategory.label} — Trang {page}/{totalPages}
+                {pagination.totalItems && ` · ${pagination.totalItems.toLocaleString()} phim`}
+              </p>
+
+              <div className="thung-phim__grid">
                 {movies.map((movie) => (
                   <MovieCard key={movie.slug} movie={movie} />
                 ))}
               </div>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="pagination">
-                  <button
-                    className="pagination__btn"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    <FiChevronLeft /> Trước
-                  </button>
-
-                  <div className="pagination__pages">
-                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                      let pageNum;
-                      if (totalPages <= 7) {
-                        pageNum = i + 1;
-                      } else if (page <= 4) {
-                        pageNum = i + 1;
-                      } else if (page >= totalPages - 3) {
-                        pageNum = totalPages - 6 + i;
-                      } else {
-                        pageNum = page - 3 + i;
-                      }
-                      return (
-                        <button
-                          key={pageNum}
-                          className={`pagination__page ${page === pageNum ? 'pagination__page--active' : ''}`}
-                          onClick={() => setPage(pageNum)}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    className="pagination__btn"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    Sau <FiChevronRight />
-                  </button>
-                </div>
-              )}
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
             </>
           )}
         </section>

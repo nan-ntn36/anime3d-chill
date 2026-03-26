@@ -6,6 +6,7 @@
 
 const { Router } = require('express');
 const movieController = require('../../controllers/movieController');
+const { optionalAuth } = require('../../middleware/auth');
 const {
   validatePage,
   validateSlug,
@@ -271,5 +272,28 @@ router.get('/genres', movieController.getGenres);
  *         description: Danh sách quốc gia với thumbnail đại diện
  */
 router.get('/countries', movieController.getCountries);
+
+/**
+ * @swagger
+ * /api/v1/movies/view:
+ *   post:
+ *     summary: Ghi nhận lượt xem phim (analytics)
+ *     tags: [Movies]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               movieSlug:
+ *                 type: string
+ *               sessionId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Đã ghi nhận lượt xem
+ */
+router.post('/view', optionalAuth, movieController.recordView);
 
 module.exports = router;

@@ -1,51 +1,128 @@
-# Giải thích code Ngày 12: Watch Progress (History Sync)
+# Giải thích code Ngày 12: Watch Progress & History
 
 ## Kiến trúc tổng quan
 
-Mô hình quá trình đồng bộ thời gian xem phim đa nền tảng:
+Hệ thống lịch sử xem phim hoạt động ở **2 chế độ** (Guest & User) với cơ chế đồng bộ tự động khi đăng nhập.
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant LocalStorage
-    participant MoviePlayerPage
-    participant BackendAPI (Save/Sync)
-    participant Database
+    participant LS as localStorage
+    participant Page as MoviePlayerPage
+    participant API as Backend API
+    participant DB as Database
 
-    User->>MoviePlayerPage: Xem phim > 30s
-    Note over MoviePlayerPage: Lặp mỗi 15 giây hoặc <br/>khi user rời trang
-    MoviePlayerPage->>LocalStorage: Ghi lastPositionSeconds
+    User->>Page: Mở tập phim
+
+    Note over Page: saveWatchVisit()<br/>Ghi nhận "đã xem" ngay lập tức
+
+    Page->>LS: Ghi visit record
     alt Đã đăng nhập
-        MoviePlayerPage->>BackendAPI (Save/Sync): Gửi lên server (POST /api/v1/me/history)
-        BackendAPI (Save/Sync)->>Database: Upsert (Cập nhật lịch sử)
+        Page->>API: POST /me/history (visit)
+        API->>DB: Upsert watch_history
     end
-    
-    User->>MoviePlayerPage: F5 Tải lại bản tin
-    MoviePlayerPage->>LocalStorage: getProgress(): Trả về startTime
-    Note over MoviePlayerPage: Truyền startTime vào usePlayer()
-    MoviePlayerPage->>User: Auto-seek: startTime - 5s
+
+    Note over Page: Nếu m3u8 mode:<br/>Lặp mỗi 15s gọi saveProgress()
+
+    Page->>LS: Cập nhật currentTime
+    alt Đã đăng nhập
+        Page->>API: POST /me/history (progress)
+        API->>DB: Upsert lastPositionSeconds
+    end
+
+    User->>Page: F5 / Quay lại phim
+    Page->>LS: getProgress() → startTime
+    Page->>User: Auto-seek (startTime - 5s)
 ```
 
 ## Giải thích từng file
 
 ### 1. `src/services/watchProgressService.js` (Frontend)
-- **Mục đích**: Chịu trách nhiệm lưu tiến độ xuống bộ nhớ Local của khách (Cache First). Và nếu có Token Auth, gọi userApi đẩy history về Base Backend. 
-- Lợi ích: Khách hàng ko cần đăng nhập vẫn giữ nguyên được thói quen và trải nghiệm. Khi đăng nhập thì đồng bộ 2 chiều qua `syncHistoryToServer()`.
+
+Chịu trách nhiệm quản lý toàn bộ logic lưu/đọc/đồng bộ tiến độ xem phim.
+
+| Function | Mục đích | Điều kiện |
+|----------|----------|-----------|
+| `saveProgress()` | Lưu tiến độ xem (thời gian hiện tại) | Chỉ lưu khi `currentTime > 30s` và `duration > 0` |
+| `saveWatchVisit()` | Ghi nhận "đã mở xem" (không cần track progress) | Luôn ghi, kể cả embed mode |
+| `getProgress()` | Đọc tiến độ xem từ localStorage | Trả `null` nếu chưa xem |
+| `syncHistoryToServer()` | Đẩy batch localStorage lên server sau khi đăng nhập | Gọi tự động sau login |
+
+**Chiến lược lưu trữ:**
+- **localStorage key**: `anime3d_watch_progress` — lưu map `{movieSlug}:{episode}` → progress data
+- **Cache-first**: Luôn lưu localStorage trước, gọi API sau (nếu đã login)
+- **Fallback**: Nếu API lỗi, localStorage đã lưu nên UX không bị ảnh hưởng
+
+**Tại sao cần `saveWatchVisit`?**
+- Player mặc định dùng **embed mode** (iframe) khi có `embedUrl` (đa số nguồn phim)
+- Trong embed mode: `currentTime` và `duration` luôn = 0 (không đọc được cross-origin iframe)
+- `saveProgress()` có guard `currentTime <= 30 → return` → **không bao giờ lưu được**
+- `saveWatchVisit()` bỏ qua guard này, chỉ ghi nhận "user đã mở xem tập này"
 
 ### 2. `src/controllers/meController.js` (Backend)
-- Chứa các function `saveHistory()` và `syncHistory()`.
-- **`syncHistory`**: Dùng để xử lý hàng loạt lịch sử được submit bởi Web Client vào thời điểm Đăng nhập. Cơ chế so sánh `updatedAt` của client và máy chủ DB giúp triệt tiêu ghi đè Data Cũ Lên Mới bằng tham số logic `clientDate > history.watchedAt`.
+
+| Function | Method | Endpoint | Mô tả |
+|----------|--------|----------|-------|
+| `saveHistory()` | POST | `/me/history` | Upsert 1 record (từ saveProgress hoặc saveWatchVisit) |
+| `getHistory()` | GET | `/me/history` | Phân trang lịch sử xem (mới nhất trước) |
+| `syncHistory()` | POST | `/me/history/sync` | Upsert batch từ localStorage sau khi đăng nhập |
+
+**Cơ chế Upsert (`findOrCreate`):**
+```
+Tìm record theo [userId, movieSlug, episode]
+├── Không tồn tại → Tạo mới với defaults
+└── Đã tồn tại → Cập nhật duration, lastPositionSeconds, watchedAt
+```
+
+**`syncHistory` — Merge thông minh:**
+- Client gửi `{ items: [...] }` (mảng history records)
+- Server so sánh `clientDate > history.watchedAt` hoặc `lastPositionSeconds` lớn hơn
+- Chỉ ghi đè nếu bản client mới hơn → tránh mất dữ liệu
 
 ### 3. `src/pages/MoviePlayerPage.jsx`
-- Nhúng Logic Timer Debounce 15s trực tiếp vào Component Page thay vì trong Hook, giúp Player Component tách rời và độc lập hoàn toàn.
-- Bắn props `startTime` vào `MoviePlayer` để thiết lập init offset. Mốc thời gian được lấy lên khi Mounted là mốc của tập hiện tại (đã xem bao lâu). 
+
+Tích hợp 3 useEffect cho watch history:
+
+| Effect | Trigger | Chế độ |
+|--------|---------|--------|
+| `saveWatchVisit()` | Khi `movie.slug` hoặc `currentEp.slug` thay đổi | Cả embed & m3u8 |
+| `saveProgress()` debounce 15s | Khi `currentTime` chênh ≥ 15s so với lần cuối | Chỉ m3u8 |
+| `saveProgress()` cleanup | Khi unmount (đổi tập / thoát trang) | Chỉ m3u8 |
+
+**Truyền `startTime` vào MoviePlayer:**
+- Khi mount: gọi `getProgress(slug, episode)` lấy `currentTime` đã lưu
+- Truyền xuống `<MoviePlayer startTime={startTime} />`
+- `usePlayer.js` nhận `startTime` và seek đến `startTime - 5s` khi HLS manifest parsed
 
 ### 4. `src/hooks/usePlayer.js`
-- Mốc gài thời gian: Ở Event `Hls.Events.MANIFEST_PARSED`, DOM Video được ra lệnh gán `video.currentTime = startTime - 5`. Đây là sự tinh tế UX để người xem nhớ lại bối cảnh (context) cảnh xem cũ.
 
-## Mối Liên Hệ
-- Logic sẽ nối tiếp Day 13 (Tạo Giao Diện Quản Lý Lịch Sử / Yêu Thích trong Profile page).
-- API `meController` phải được bảo vệ bởi middleware `protect`. 
+Mốc gài thời gian: Ở Event `Hls.Events.MANIFEST_PARSED`, DOM Video được gán `video.currentTime = startTime - 5`. Lùi 5 giây để người xem nhớ lại bối cảnh cảnh xem cũ.
+
+### 5. `src/models/WatchHistory.js` (Backend)
+
+Sequelize model với unique composite index:
+```
+UNIQUE KEY: (user_id, movie_slug, episode)
+INDEX: (user_id, watched_at DESC)  → tối ưu query getHistory
+```
+
+## Mối Liên Hệ Giữa Các Module
+
+```mermaid
+graph TD
+    A[MoviePlayerPage.jsx] -->|import| B[watchProgressService.js]
+    A -->|import| C[MoviePlayer.jsx]
+    A -->|import| D[usePlayer.js]
+    B -->|import| E[userApi.js]
+    B -->|import| F[authStore.js]
+    E -->|HTTP| G[meController.js]
+    G -->|ORM| H[WatchHistory Model]
+    I[useAuth.js] -->|login success| B
+    J[Profile.jsx] -->|display| E
+```
 
 ## Lưu Ý Quan Trọng
-- Lịch sử xem được khóa Primary Keys theo format `[userId, movieSlug, episode]`. Nếu user xem lại tập đó, thời gian sẽ được CẬP NHẬT đè, thay vì tạo mới. Tránh rác Database.
+
+- Lịch sử xem được khóa Primary Key theo format `[userId, movieSlug, episode]`. Nếu user xem lại tập đó, thời gian sẽ được **CẬP NHẬT đè**, không tạo mới → tránh rác Database.
+- Embed mode chiếm đa số nguồn phim — `saveWatchVisit()` đảm bảo lịch sử luôn được ghi nhận.
+- API `meController` phải được bảo vệ bởi middleware `authenticate`.

@@ -1,16 +1,15 @@
 /**
  * Guest Session ID Generator
- * Dùng để phân biệt guest user (phục vụ analytics & lịch sử nếu cần mở rộng)
+ * Dùng để phân biệt guest user (phục vụ analytics & lịch sử)
+ * Sử dụng crypto.randomUUID() (native browser API, không cần thư viện)
  */
-
-import { v4 as uuidv4 } from 'uuid';
 
 const GUEST_ID_KEY = 'anime3d_session_id';
 
 export const getGuestId = () => {
   let guestId = localStorage.getItem(GUEST_ID_KEY);
   if (!guestId) {
-    guestId = uuidv4();
+    guestId = crypto.randomUUID();
     localStorage.setItem(GUEST_ID_KEY, guestId);
   }
   return guestId;

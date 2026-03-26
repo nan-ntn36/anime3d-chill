@@ -56,6 +56,12 @@ const movieApi = {
    * Danh sách quốc gia + thumbnail
    */
   getCountries: () => api.get('/movies/countries'),
+
+  /**
+   * Ghi nhận lượt xem phim (analytics)
+   * @param {{ movieSlug: string, sessionId: string }} data
+   */
+  recordView: (data) => api.post('/movies/view', data),
 };
 
 export default movieApi;

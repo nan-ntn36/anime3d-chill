@@ -332,7 +332,7 @@ graph LR
 
 - `referrerPolicy="no-referrer"` **bắt buộc** cho `<img>` từ `phimimg.com` — nếu thiếu, ảnh sẽ bị 403
 - `loading="lazy"` trên TopicCard thumbnail — không lazy load hết, chỉ ảnh ngoài viewport
-- Pagination dùng **sliding window 7 buttons** — giống pattern ở `Home.jsx` và `ThungPhim.jsx`
+- Pagination dùng **component `<Pagination>` thống nhất** (`src/components/ui/Pagination.jsx`) — amber gradient active state, glow effect. Trước đó `Home.css` có CSS trùng gây conflict khi navigate giữa trang, đã xóa.
 
 ---
 

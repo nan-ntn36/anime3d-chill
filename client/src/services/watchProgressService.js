@@ -1,5 +1,7 @@
 import useAuthStore from '../store/authStore';
 import userApi from '../api/userApi';
+import movieApi from '../api/movieApi';
+import { getGuestId } from './guestId';
 
 const PROGRESS_KEY = 'anime3d_watch_progress';
 const HISTORY_KEY = 'anime3d_watch_history';
@@ -104,15 +106,17 @@ export const syncHistoryToServer = async () => {
 };
 
 /**
- * Lưu lịch sử xem (visit) — dùng cho embed mode khi không track được progress
- * Khác saveProgress: không cần currentTime > 30s, chỉ ghi nhận user đã mở xem tập này
+ * Lưu lịch sử xem (visit) — dùng cho cả embed và m3u8 mode
+ * 1. Ghi localStorage (cho guest)
+ * 2. Ghi watch_history (nếu đã login)
+ * 3. Ghi movie_views analytics (luôn luôn, kể cả guest — dùng guestId)
  */
 export const saveWatchVisit = async ({ movieSlug, movieName, movieThumb, episode, serverName }) => {
   if (!movieSlug || !episode) return;
 
   const isAuthenticated = useAuthStore.getState().isAuthenticated;
 
-  // Lưu vào localStorage history
+  // 1. Lưu vào localStorage history
   const progressMap = loadLocalProgress();
   const key = `${movieSlug}:${episode}`;
   if (!progressMap[key]) {
@@ -123,7 +127,7 @@ export const saveWatchVisit = async ({ movieSlug, movieName, movieThumb, episode
     saveLocalProgress(progressMap);
   }
 
-  // Nếu đã đăng nhập, gửi API
+  // 2. Nếu đã đăng nhập, ghi watch_history cho user
   if (isAuthenticated) {
     try {
       await userApi.saveHistory({
@@ -134,6 +138,17 @@ export const saveWatchVisit = async ({ movieSlug, movieName, movieThumb, episode
     } catch (error) {
       console.error('Lỗi khi lưu lịch sử visit lên server', error);
     }
+  }
+
+  // 3. Ghi nhận lượt xem (analytics) — cả guest lẫn user
+  try {
+    await movieApi.recordView({
+      movieSlug,
+      sessionId: getGuestId(),
+    });
+  } catch (error) {
+    // Analytics fail không ảnh hưởng UX
+    console.error('Lỗi khi ghi nhận lượt xem', error);
   }
 };
 

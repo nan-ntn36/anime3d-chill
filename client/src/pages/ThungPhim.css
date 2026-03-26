@@ -1,0 +1,148 @@
+/* ══════════════════════════════════════════════════════════
+   ThungPhim — Kho phim với category tabs
+   ══════════════════════════════════════════════════════════ */
+
+.thung-phim {
+  padding-top: calc(var(--header-height) + var(--space-8));
+  padding-bottom: var(--space-16);
+}
+
+/* Header */
+.thung-phim__header {
+  margin-bottom: var(--space-6);
+}
+
+.thung-phim__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 900;
+  font-style: italic;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.thung-phim__title-icon {
+  font-size: 32px;
+}
+
+.thung-phim__subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+}
+
+/* ── Category Tabs ── */
+.thung-phim__tabs {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.thung-phim__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.thung-phim__tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.thung-phim__tab:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-primary);
+}
+
+.thung-phim__tab--active {
+  background: var(--color-accent-gradient);
+  color: var(--color-bg);
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: 0 0 16px var(--color-accent-light);
+}
+
+.thung-phim__tab-icon {
+  font-size: 16px;
+}
+
+/* ── Content ── */
+.thung-phim__count {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
+.thung-phim__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-4);
+}
+
+/* ── Empty State ── */
+.thung-phim__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.thung-phim__empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .thung-phim__grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .thung-phim__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .thung-phim__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .thung-phim__tabs {
+    gap: var(--space-1);
+  }
+
+  .thung-phim__tab {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .thung-phim__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
