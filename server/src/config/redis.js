@@ -29,6 +29,8 @@ async function connectRedis() {
         host: env.redis.host,
         port: env.redis.port,
         password: env.redis.password,
+        // TLS cho cloud Redis (Upstash, Redis Cloud, etc.)
+        ...(process.env.REDIS_TLS === 'true' && { tls: {} }),
         maxRetriesPerRequest: 3,
         retryStrategy(times) {
           if (times > 5) {

@@ -28,6 +28,12 @@ const sequelize = new Sequelize(env.db.name, env.db.user, env.db.password, {
   dialectOptions: {
     charset: 'utf8mb4',
     connectTimeout: 10000,
+    // SSL cho cloud databases (TiDB, PlanetScale, etc.)
+    ...(process.env.DB_SSL === 'true' && {
+      ssl: {
+        rejectUnauthorized: true,
+      },
+    }),
   },
 });
 
