@@ -49,15 +49,16 @@ function normalizeMovieItem(raw) {
  * KKPhim list API trả về: { status, items, pagination }
  * pagination: { totalItems, totalItemsPerPage, currentPage, totalPages }
  * @param {object} rawResponse - response từ KKPhim API
+ * @param {number} [limit] - giới hạn số items trả về (VD: 12)
  * @returns {{ items: Array, pagination: object }}
  */
-function transformMovieList(rawResponse) {
+function transformMovieList(rawResponse, limit) {
   // KKPhim: items ở root, hoặc trong data.items (v1 api endpoint)
   const rawItems = rawResponse?.items
     || rawResponse?.data?.items
     || [];
 
-  const items = Array.isArray(rawItems)
+  let items = Array.isArray(rawItems)
     ? rawItems.map(normalizeMovieItem).filter(Boolean)
     : [];
 
@@ -67,11 +68,20 @@ function transformMovieList(rawResponse) {
     || rawResponse?.params?.pagination
     || {};
 
+  const totalItems = parseInt(paginate.totalItems || paginate.total_items || items.length, 10);
+  const originalPerPage = parseInt(paginate.totalItemsPerPage || paginate.items_per_page || items.length, 10);
+
+  // Nếu có limit → slice items và tính lại pagination
+  const effectivePerPage = limit || originalPerPage;
+  if (limit && items.length > limit) {
+    items = items.slice(0, limit);
+  }
+
   const pagination = {
     currentPage: parseInt(paginate.currentPage || paginate.current_page || 1, 10),
-    totalPages: parseInt(paginate.totalPages || paginate.total_page || 1, 10),
-    totalItems: parseInt(paginate.totalItems || paginate.total_items || items.length, 10),
-    itemsPerPage: parseInt(paginate.totalItemsPerPage || paginate.items_per_page || items.length, 10),
+    totalPages: effectivePerPage > 0 ? Math.ceil(totalItems / effectivePerPage) : 1,
+    totalItems,
+    itemsPerPage: effectivePerPage,
   };
 
   return { items, pagination };

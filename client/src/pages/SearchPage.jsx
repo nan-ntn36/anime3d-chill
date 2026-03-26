@@ -7,9 +7,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { FiSearch, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiSearch, FiX } from 'react-icons/fi';
 import MovieCard from '@components/movie/MovieCard';
 import TopicCard from '@components/ui/TopicCard';
+import Pagination from '@components/ui/Pagination';
 import ErrorFallback from '@components/common/ErrorFallback';
 import { useSearchMovies, useGenres } from '@/hooks/useMovies';
 import './SearchPage.css';
@@ -137,42 +138,11 @@ export default function SearchPage() {
                 </div>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="pagination">
-                    <button
-                      className="pagination__btn"
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
-                      <FiChevronLeft /> Trước
-                    </button>
-                    <div className="pagination__pages">
-                      {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                        let pageNum;
-                        if (totalPages <= 7) pageNum = i + 1;
-                        else if (page <= 4) pageNum = i + 1;
-                        else if (page >= totalPages - 3) pageNum = totalPages - 6 + i;
-                        else pageNum = page - 3 + i;
-                        return (
-                          <button
-                            key={pageNum}
-                            className={`pagination__page ${page === pageNum ? 'pagination__page--active' : ''}`}
-                            onClick={() => setPage(pageNum)}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button
-                      className="pagination__btn"
-                      disabled={page >= totalPages}
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    >
-                      Sau <FiChevronRight />
-                    </button>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
               </>
             )}
           </section>

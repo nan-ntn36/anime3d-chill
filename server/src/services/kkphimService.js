@@ -218,7 +218,7 @@ async function getByGenre(slug, page = 1) {
     `movies:genre:${slug}:page:${page}`,
     `/v1/api/the-loai/${slug}?page=${page}`,
     TTL.GENRE,
-    transformMovieList
+    (raw) => transformMovieList(raw, 12)
   );
 }
 
@@ -231,7 +231,7 @@ async function getByCountry(slug, page = 1) {
     `movies:country:${slug}:page:${page}`,
     `/v1/api/quoc-gia/${slug}?page=${page}`,
     TTL.COUNTRY,
-    transformMovieList
+    (raw) => transformMovieList(raw, 12)
   );
 }
 
@@ -258,7 +258,7 @@ async function searchMovies(keyword, page = 1) {
     `movies:search:${safeKw}:page:${page}`,
     `/v1/api/tim-kiem?keyword=${safeKw}&page=${page}`,
     TTL.SEARCH,
-    transformMovieList
+    (raw) => transformMovieList(raw, 12)
   );
 }
 
