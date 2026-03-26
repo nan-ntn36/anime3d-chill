@@ -18,4 +18,22 @@ router
  */
 router.post('/history/sync', authenticate, meController.syncHistory);
 
+/**
+ * Route: /api/v1/me/favorites
+ */
+router
+  .route('/favorites')
+  .get(authenticate, meController.getFavorites)
+  .post(authenticate, meController.addFavorite);
+
+router.delete('/favorites/:movieSlug', authenticate, meController.removeFavorite);
+
+const validate = require('../../middleware/validate');
+const { updateProfileValidation } = require('../../validators/userValidators');
+
+/**
+ * Route: /api/v1/me/profile
+ */
+router.patch('/profile', authenticate, validate(updateProfileValidation), meController.updateProfile);
+
 module.exports = router;

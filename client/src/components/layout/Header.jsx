@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiSearch, FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import useAuthStore from '@store/authStore';
+import useAuth from '@/hooks/useAuth';
 import './Header.css';
 
 /**
@@ -13,7 +14,8 @@ export default function Header() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isAuthenticated, user, clearAuth } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const { logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,8 +46,8 @@ export default function Header() {
     }
   };
 
-  const handleLogout = () => {
-    clearAuth();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -108,13 +110,13 @@ export default function Header() {
           {/* User */}
           {isAuthenticated ? (
             <div className="header__user">
-              <span className="header__avatar">
+              <Link to="/ca-nhan" className="header__avatar" title="Trang cá nhân">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.username} />
                 ) : (
                   <FiUser />
                 )}
-              </span>
+              </Link>
               <button className="btn btn-ghost btn-sm" onClick={handleLogout} title="Đăng xuất">
                 <FiLogOut />
               </button>

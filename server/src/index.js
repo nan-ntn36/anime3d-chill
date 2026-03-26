@@ -174,17 +174,29 @@ app.use(errorHandler);
 // ── Start Server ────────────────────────────────────────────
 async function startServer() {
   // Connect to Database
-  const dbConnected = await connectDatabase();
+  logger.info('⏳ Bắt đầu kết nối Database...');
+  
+  let dbConnected = false;
+  let retries = 10;
+  
+  while (retries > 0 && !dbConnected) {
+    dbConnected = await connectDatabase();
+    if (!dbConnected) {
+      logger.warn(`⏳ Đợi MySQL khởi động (Thử lại sau 5s)... Còn ${retries} lần.`);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      retries--;
+    }
+  }
+  
   if (!dbConnected) {
-    logger.warn('⚠️ Server starting without database connection');
+    logger.fatal('💀 Server không thể khởi động vì Database vĩnh viễn không chịu kết nối!');
+    process.exit(1); // Ép Nodemon sập mâm (hoặc treo kệ nó)
   }
 
   // Sync models + seed (dev only)
-  if (dbConnected) {
-    await syncModels({ alter: env.isDev });
-    if (env.isDev) {
-      await seedUsers(User);
-    }
+  await syncModels({ alter: env.isDev });
+  if (env.isDev) {
+    await seedUsers(User);
   }
 
   // Connect to Redis

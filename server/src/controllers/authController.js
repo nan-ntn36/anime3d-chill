@@ -11,10 +11,10 @@ const env = require('../config/env');
 function setRefreshCookie(res, token) {
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: env.isProd,
-    sameSite: 'Lax',
+    secure: env.isProd, // true khi ở server thật (https)
+    sameSite: env.isProd ? 'None' : 'Lax', 
     maxAge: 30 * 24 * 60 * 60 * 1000,
-    path: '/api/v1/auth',
+    path: '/', // Mở rộng path ra root để trình duyệt luôn gửi
   });
 }
 
@@ -22,8 +22,8 @@ function clearRefreshCookie(res) {
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: env.isProd,
-    sameSite: 'Lax',
-    path: '/api/v1/auth',
+    sameSite: env.isProd ? 'None' : 'Lax',
+    path: '/', // Phải match với path lúc set
   });
 }
 
@@ -70,7 +70,7 @@ async function login(req, res, next) {
 }
 
 /**
- * POST /api/v1/auth/refresh
+ * Làm mới access token (dùng refreshToken từ cookie)
  */
 async function refresh(req, res, next) {
   try {

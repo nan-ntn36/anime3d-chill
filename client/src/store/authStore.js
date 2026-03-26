@@ -31,7 +31,7 @@ const useAuthStore = create((set, get) => ({
    * Cập nhật thông tin user
    */
   setUser: (user) =>
-    set({ user }),
+    set({ user, isAuthenticated: !!user }),
 
   /**
    * Clear auth (logout / token expired)

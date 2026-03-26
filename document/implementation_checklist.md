@@ -338,19 +338,19 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 13 · Yêu Thích & Lịch Sử Xem
 
 **Module: Me Routes (Backend)**
-- [ ] `src/controllers/meController.js`:
-  - [ ] Favorites: GET (phân trang), POST (thêm), DELETE (xóa)
-  - [ ] History: GET (phân trang), POST (lưu), POST sync (batch)
-  - [ ] Profile: PATCH (cập nhật hồ sơ)
-- [ ] `src/validators/userValidators.js` — validate input
-- [ ] `src/routes/v1/meRoutes.js` — mount routes (yêu cầu auth)
-- [ ] Phân trang: `?page=1&limit=20`, max=50
+- [x] `src/controllers/meController.js`:
+  - [x] Favorites: GET (phân trang), POST (thêm), DELETE (xóa)
+  - [x] History: GET (phân trang), POST (lưu), POST sync (batch)
+  - [x] Profile: PATCH (cập nhật hồ sơ)
+- [x] `src/validators/userValidators.js` — validate input
+- [x] `src/routes/v1/meRoutes.js` — mount routes (yêu cầu auth)
+- [x] Phân trang: `?page=1&limit=20`, max=50
 
 **Module: Frontend Pages**
-- [ ] Auth hooks: `src/hooks/useAuth.js` — login, register, logout, refresh
-- [ ] `src/pages/LoginPage.jsx` — React Hook Form + validation
-- [ ] `src/pages/RegisterPage.jsx` — React Hook Form + validation
-- [ ] `src/components/ui/ProtectedRoute.jsx` — redirect nếu chưa login
+- [x] Auth hooks: `src/hooks/useAuth.js` — login, register, logout, refresh
+- [x] `src/pages/LoginPage.jsx` — React Hook Form + validation
+- [x] `src/pages/RegisterPage.jsx` — React Hook Form + validation
+- [x] `src/components/ui/ProtectedRoute.jsx` — redirect nếu chưa login
 
 ---
 

@@ -1,4 +1,4 @@
-const { WatchHistory, MovieView } = require('../models');
+const { WatchHistory, Favorite, User } = require('../models');
 const { AppError } = require('../middleware/errorHandler');
 const logger = require('../utils/logger');
 
@@ -137,6 +137,140 @@ exports.getHistory = async (req, res, next) => {
 
   } catch (error) {
     logger.error(`[MeController.getHistory] Error: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * Thêm phim vào danh sách Yêu Thích
+ */
+exports.addFavorite = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { movieSlug, movieName, movieThumb } = req.body;
+
+    if (!movieSlug) {
+      return next(new AppError('Vui lòng cung cấp movieSlug', 400, 'VALIDATION_ERROR'));
+    }
+
+    const [favorite, created] = await Favorite.findOrCreate({
+      where: { userId, movieSlug },
+      defaults: { movieName, movieThumb }
+    });
+
+    if (!created) {
+      return res.status(409).json({ success: false, message: 'Phim đã có trong danh sách yêu thích' });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Đã thêm vào danh sách yêu thích',
+      data: favorite
+    });
+  } catch (error) {
+    logger.error(`[MeController.addFavorite] Error: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * Xóa phim khỏi danh sách Yêu Thích
+ */
+exports.removeFavorite = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { movieSlug } = req.params;
+
+    const favorite = await Favorite.findOne({ where: { userId, movieSlug } });
+    if (!favorite) {
+      return next(new AppError('Không tìm thấy phim trong danh sách', 404, 'NOT_FOUND'));
+    }
+
+    await favorite.destroy();
+
+    res.status(200).json({
+      success: true,
+      message: 'Đã xóa khỏi danh sách yêu thích'
+    });
+  } catch (error) {
+    logger.error(`[MeController.removeFavorite] Error: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * Lấy danh sách phim Yêu Thích (Phân trang)
+ */
+exports.getFavorites = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Favorite.findAndCountAll({
+      where: { userId },
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
+    });
+
+    res.status(200).json({
+      success: true,
+      data: rows,
+      meta: {
+        page,
+        limit,
+        totalItems: count,
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+
+  } catch (error) {
+    logger.error(`[MeController.getFavorites] Error: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
+ * Cập nhật Profile (Avatar, Mật khẩu)
+ */
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { avatar, oldPassword, newPassword } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    // Cập nhật Avatar
+    if (avatar) {
+      user.avatar = avatar;
+    }
+
+    // Cập nhật mật khẩu
+    if (oldPassword && newPassword) {
+      const isMatch = await user.comparePassword(oldPassword);
+      if (!isMatch) {
+        return next(new AppError('Mật khẩu cũ không chính xác', 400, 'VALIDATION_ERROR'));
+      }
+      user.password = newPassword; // Hook save() sẽ tự hash
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Cập nhật tài khoản thành công',
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    logger.error(`[MeController.updateProfile] Error: ${error.message}`);
     next(error);
   }
 };

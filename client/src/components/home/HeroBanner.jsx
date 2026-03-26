@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FiPlay, FiBookmark } from 'react-icons/fi';
+import { FaBookmark } from 'react-icons/fa';
+import { useFavoriteToggle } from '@/hooks/useMovies';
 import './HeroBanner.css';
 
 const AUTO_ROTATE_MS = 6000;
@@ -12,6 +14,9 @@ export default function HeroBanner({ movies = [], loading = false }) {
   const progressRef = useRef(null);
 
   const slides = movies.slice(0, 6);
+  const activeMovie = slides[activeIndex] || null;
+
+  const { toggle: toggleFavorite, isFavorited, isPending: favPending } = useFavoriteToggle(activeMovie);
 
   const goTo = useCallback((index) => {
     setActiveIndex(index);
@@ -64,6 +69,7 @@ export default function HeroBanner({ movies = [], loading = false }) {
   return (
     <div className="hero-banner">
       {slides.map((movie, index) => {
+        const isActive = index === activeIndex;
         const bgImage = movie.thumb || movie.poster || '';
         const rawDesc = movie.content
           ? movie.content.replace(/<[^>]*>?/gm, '').substring(0, 180)
@@ -104,8 +110,16 @@ export default function HeroBanner({ movies = [], loading = false }) {
                 <Link to={`/phim/${movie.slug}`} className="hero-banner__btn-primary">
                   <FiPlay /> XEM NGAY
                 </Link>
-                <button className="hero-banner__btn-secondary">
-                  <FiBookmark /> LƯU LẠI
+                <button 
+                  className={`hero-banner__btn-secondary ${isActive && isFavorited ? 'favorited' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (isActive) toggleFavorite();
+                  }}
+                  disabled={isActive && favPending}
+                >
+                  {isActive && isFavorited ? <FaBookmark style={{ color: 'var(--color-accent)' }} /> : <FiBookmark />}
+                  {isActive && isFavorited ? ' ĐÃ LƯU' : ' LƯU LẠI'}
                 </button>
               </div>
             </div>
