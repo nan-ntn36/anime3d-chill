@@ -102,3 +102,38 @@ export const syncHistoryToServer = async () => {
     console.error('Sync history failed', error);
   }
 };
+
+/**
+ * Lưu lịch sử xem (visit) — dùng cho embed mode khi không track được progress
+ * Khác saveProgress: không cần currentTime > 30s, chỉ ghi nhận user đã mở xem tập này
+ */
+export const saveWatchVisit = async ({ movieSlug, movieName, movieThumb, episode, serverName }) => {
+  if (!movieSlug || !episode) return;
+
+  const isAuthenticated = useAuthStore.getState().isAuthenticated;
+
+  // Lưu vào localStorage history
+  const progressMap = loadLocalProgress();
+  const key = `${movieSlug}:${episode}`;
+  if (!progressMap[key]) {
+    progressMap[key] = {
+      movieSlug, movieName, movieThumb, episode, serverName,
+      currentTime: 0, duration: 0, updatedAt: Date.now()
+    };
+    saveLocalProgress(progressMap);
+  }
+
+  // Nếu đã đăng nhập, gửi API
+  if (isAuthenticated) {
+    try {
+      await userApi.saveHistory({
+        movieSlug, movieName, movieThumb, episode, serverName,
+        duration: 0,
+        lastPositionSeconds: 0
+      });
+    } catch (error) {
+      console.error('Lỗi khi lưu lịch sử visit lên server', error);
+    }
+  }
+};
+

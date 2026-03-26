@@ -55,7 +55,7 @@ exports.saveHistory = async (req, res, next) => {
 exports.syncHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { historyBatch } = req.body; // Array of history objects
+    const { items: historyBatch } = req.body; // Frontend sends { items: [...] }
 
     if (!Array.isArray(historyBatch) || historyBatch.length === 0) {
       return res.status(200).json({ success: true, message: 'Không có dữ liệu để đồng bộ' });

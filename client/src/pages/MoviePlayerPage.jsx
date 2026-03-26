@@ -13,7 +13,7 @@ import MoviePlayer from '@/components/movie/MoviePlayer';
 import PlayerErrorBoundary from '@/components/movie/PlayerErrorBoundary';
 import CommentSection from '@/components/movie/CommentSection';
 import RankingSidebar from '@/components/home/RankingSidebar';
-import { saveProgress, getProgress } from '@/services/watchProgressService';
+import { saveProgress, getProgress, saveWatchVisit } from '@/services/watchProgressService';
 
 /**
  * Strip HTML tags
@@ -69,7 +69,7 @@ export default function MoviePlayerPage() {
     return progress?.currentTime || 0;
   }, [movie, currentEp]);
 
-  // Lưu tiến độ định kỳ (Mỗi 15s hoặc khi gần hết video)
+  // Lưu tiến độ định kỳ (Mỗi 15s hoặc khi gần hết video) — chỉ hoạt động với m3u8 mode
   useEffect(() => {
     if (!movie || !currentEp) return;
     
@@ -87,6 +87,18 @@ export default function MoviePlayerPage() {
       lastSavedTime.current = currentTime;
     }
   }, [currentTime, duration, movie, currentEp, currentServer]);
+
+  // Lưu lịch sử xem khi mở tập (hoạt động cho cả embed lẫn m3u8)
+  useEffect(() => {
+    if (!movie || !currentEp) return;
+    saveWatchVisit({
+      movieSlug: movie.slug,
+      movieName: movie.title,
+      movieThumb: movie.thumb || movie.poster,
+      episode: currentEp.slug,
+      serverName: currentServer?.serverName || 'V.I.P',
+    });
+  }, [movie?.slug, currentEp?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Lưu tiến độ lần cuối khi đổi tập hoặc thoát trang
   useEffect(() => {
