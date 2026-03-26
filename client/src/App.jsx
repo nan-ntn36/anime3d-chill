@@ -37,6 +37,12 @@ export default function App() {
   // Zustand state handle Loading từ isCheckingAuth trong hook useAuth
   const isLoading = useAuthStore(state => state.isLoading);
 
+  // Nếu chưa từng login (query disabled), tắt loading ngay
+  const hasSession = typeof window !== 'undefined' && localStorage.getItem('hasSession') === '1';
+  if (!hasSession && isLoading) {
+    useAuthStore.getState().setLoaded();
+  }
+
   if (isCheckingAuth && isLoading) {
     return <PageLoader />;
   }

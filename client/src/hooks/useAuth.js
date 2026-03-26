@@ -13,21 +13,43 @@ export default function useAuth() {
   const { setAuth, clearAuth } = useAuthStore();
 
   // ── 1. Get Me (Check auth lần đầu) ──────────────────────────
+  // Chỉ chạy khi user đã từng login (có flag trong localStorage)
+  const hasSession = typeof window !== 'undefined' && localStorage.getItem('hasSession') === '1';
+
   const { data: user, isLoading: isCheckingAuth, refetch: checkAuth } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: async () => {
       try {
+        // Nếu chưa có accessToken (vd: sau reload), refresh trước
+        const { accessToken } = useAuthStore.getState();
+        if (!accessToken) {
+          try {
+            const { data: refreshData } = await authApi.refresh();
+            useAuthStore.getState().setAccessToken(refreshData.data.accessToken);
+          } catch {
+            // Refresh fail → xóa flag, chưa đăng nhập
+            localStorage.removeItem('hasSession');
+            useAuthStore.getState().clearAuth();
+            useAuthStore.getState().setLoaded();
+            throw new Error('Chưa đăng nhập');
+          }
+        }
+
         const { data } = await authApi.getMe();
         const userData = data.data;
-        useAuthStore.getState().setUser(userData);
-        useAuthStore.getState().setLoaded();
+        useAuthStore.getState().setAuth({
+          user: userData,
+          accessToken: useAuthStore.getState().accessToken,
+        });
         return userData;
       } catch (error) {
+        localStorage.removeItem('hasSession');
         useAuthStore.getState().clearAuth();
         useAuthStore.getState().setLoaded();
         throw new Error('Chưa đăng nhập');
       }
     },
+    enabled: hasSession, // ← Không gọi nếu chưa từng login
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
@@ -38,6 +60,7 @@ export default function useAuth() {
     onSuccess: async (response) => {
       const { user, accessToken } = response.data.data;
       setAuth({ user, accessToken });
+      localStorage.setItem('hasSession', '1'); // ← Đánh dấu đã login
       
       // Đồng bộ lịch sử xem ẩn danh (nếu có) lên server
       await syncHistoryToServer();
@@ -56,11 +79,12 @@ export default function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: () => authApi.logout(),
     onSuccess: () => {
+      localStorage.removeItem('hasSession'); // ← Xóa flag
       clearAuth();
-      queryClient.clear(); // Xóa tất cả cache
+      queryClient.clear();
     },
     onError: () => {
-      // Dù API fail cũng clear auth dưới client
+      localStorage.removeItem('hasSession');
       clearAuth();
       queryClient.clear();
     }
