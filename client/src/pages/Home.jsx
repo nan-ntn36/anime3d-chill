@@ -5,11 +5,11 @@
 
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import HeroBanner from '@components/home/HeroBanner';
 import GenreCards from '@components/home/GenreCards';
 import MovieCarousel from '@components/movie/MovieCarousel';
 import MovieCard from '@components/movie/MovieCard';
+import Pagination from '@components/ui/Pagination';
 import RankingSidebar from '@components/home/RankingSidebar';
 import TopRankingFooter from '@components/home/TopRankingFooter';
 import ErrorFallback from '@components/common/ErrorFallback';
@@ -75,42 +75,11 @@ export default function Home() {
                   </div>
 
                   {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="pagination">
-                      <button
-                        className="pagination__btn"
-                        disabled={page <= 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      >
-                        <FiChevronLeft /> Trước
-                      </button>
-                      <div className="pagination__pages">
-                        {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                          let pageNum;
-                          if (totalPages <= 7) pageNum = i + 1;
-                          else if (page <= 4) pageNum = i + 1;
-                          else if (page >= totalPages - 3) pageNum = totalPages - 6 + i;
-                          else pageNum = page - 3 + i;
-                          return (
-                            <button
-                              key={pageNum}
-                              className={`pagination__page ${page === pageNum ? 'pagination__page--active' : ''}`}
-                              onClick={() => setPage(pageNum)}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <button
-                        className="pagination__btn"
-                        disabled={page >= totalPages}
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      >
-                        Sau <FiChevronRight />
-                      </button>
-                    </div>
-                  )}
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
                 </>
               )}
             </section>
