@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from '@store/authStore';
 import useAuth from '@hooks/useAuth';
+import AdminLayout from '@/components/AdminLayout';
 
 const LoginPage = lazy(() => import('@pages/LoginPage'));
 const Dashboard = lazy(() => import('@pages/Dashboard'));
@@ -15,22 +16,14 @@ function PageLoader() {
   );
 }
 
-/**
- * ProtectedRoute — chỉ cho phép admin đã đăng nhập
- */
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading, user } = useAuthStore();
-
   if (isLoading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== 'admin') return <Navigate to="/login" replace />;
-
-  return children;
+  return <AdminLayout>{children}</AdminLayout>;
 }
 
-/**
- * Admin App Router
- */
 export default function App() {
   const { isCheckingAuth } = useAuth();
   const isLoading = useAuthStore((s) => s.isLoading);
@@ -48,22 +41,8 @@ export default function App() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute>
-              <UserManagement />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

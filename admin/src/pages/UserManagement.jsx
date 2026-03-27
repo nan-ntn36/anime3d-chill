@@ -1,11 +1,10 @@
 /**
- * UserManagement — Quản lý users (Admin CMS)
+ * UserManagement — CoreUI-style user table
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { HiArrowLeft, HiMagnifyingGlass, HiPencil, HiTrash, HiCheck, HiXMark } from 'react-icons/hi2';
+import { HiMagnifyingGlass, HiPencil, HiTrash, HiCheck, HiXMark } from 'react-icons/hi2';
 import { useAdminUsers, useUpdateUser, useDeleteUser } from '@hooks/useAdmin';
 import toast from 'react-hot-toast';
 import './UserManagement.css';
@@ -58,104 +57,115 @@ export default function UserManagement() {
   const meta = data?.meta ?? {};
 
   return (
-    <div className="user-management">
-      <Helmet><title>Quản Lý Users — Admin CMS</title></Helmet>
+    <>
+      <Helmet><title>Users — Admin</title></Helmet>
 
-      <div className="um-header">
-        <div className="um-header__left">
-          <Link to="/" className="btn btn-ghost btn-sm"><HiArrowLeft /> Dashboard</Link>
-          <h1>Quản Lý Users</h1>
-          {meta.totalItems !== undefined && <span className="um-count">{meta.totalItems} users</span>}
+      {/* Filters */}
+      <div className="card um-filters-card">
+        <div className="card-body um-filters">
+          <form className="um-search" onSubmit={handleSearchSubmit}>
+            <HiMagnifyingGlass className="um-search__icon" />
+            <input type="text" className="input" placeholder="Tìm username hoặc email..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
+          </form>
+          <select className="input um-role-select" value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}>
+            <option value="">Tất cả roles</option>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          {meta.totalItems !== undefined && (
+            <span className="um-total">{meta.totalItems} users</span>
+          )}
         </div>
       </div>
 
-      <div className="um-filters">
-        <form className="um-search" onSubmit={handleSearchSubmit}>
-          <HiMagnifyingGlass className="um-search__icon" />
-          <input type="text" placeholder="Tìm theo username hoặc email..." value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="input" />
-        </form>
-        <select className="input um-role-filter" value={roleFilter} onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}>
-          <option value="">Tất cả roles</option>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
+      {/* Table */}
+      <div className="card">
+        <div className="card-header">Danh sách người dùng</div>
+        <div className="table-wrap">
+          <table className="table um-table">
+            <thead>
+              <tr>
+                <th style={{ width: 50 }}></th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Đăng nhập cuối</th>
+                <th style={{ width: 120 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i}>{[...Array(7)].map((_, j) => <td key={j}><div className="skeleton" style={{ height: 16 }} /></td>)}</tr>
+                ))
+              ) : error ? (
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Không thể tải dữ liệu</td></tr>
+              ) : users.length === 0 ? (
+                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Không có users</td></tr>
+              ) : (
+                users.map((user) => (
+                  <tr key={user.id} className={!user.isActive ? 'row-inactive' : ''}>
+                    <td>
+                      <div className="user-avatar-sm">
+                        {user.avatar ? <img src={user.avatar} alt="" /> : <span>{user.username?.charAt(0).toUpperCase()}</span>}
+                        <span className={`status-dot ${user.isActive ? 'online' : 'offline'}`} />
+                      </div>
+                    </td>
+                    <td>
+                      <div className="user-cell">
+                        <strong>{user.username}</strong>
+                        <small>Registered: {new Date(user.createdAt).toLocaleDateString('vi-VN')}</small>
+                      </div>
+                    </td>
+                    <td className="text-muted">{user.email}</td>
+                    <td>
+                      {editingUser === user.id ? (
+                        <select className="input" style={{ width: 90, padding: '2px 6px', fontSize: '0.75rem' }} defaultValue={user.role} onChange={(e) => handleUpdateUser(user.id, { role: e.target.value })}>
+                          <option value="user">user</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      ) : (
+                        <span className={`badge badge-${user.role === 'admin' ? 'warning' : 'info'}`}>{user.role}</span>
+                      )}
+                    </td>
+                    <td>
+                      <button className={`status-btn ${user.isActive ? 'active' : 'inactive'}`} onClick={() => handleUpdateUser(user.id, { isActive: !user.isActive })}>
+                        {user.isActive ? <><HiCheck size={12} /> Active</> : <><HiXMark size={12} /> Inactive</>}
+                      </button>
+                    </td>
+                    <td className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+                      {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                    </td>
+                    <td>
+                      <div className="action-group">
+                        <button className="btn btn-ghost btn-sm" onClick={() => setEditingUser(editingUser === user.id ? null : user.id)} title="Edit"><HiPencil size={14} /></button>
+                        {confirmDelete === user.id ? (
+                          <>
+                            <button className="btn btn-danger btn-sm" onClick={() => handleDeleteUser(user.id)} disabled={deleteUser.isPending}>Xóa</button>
+                            <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>Hủy</button>
+                          </>
+                        ) : (
+                          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)' }} onClick={() => setConfirmDelete(user.id)} title="Delete"><HiTrash size={14} /></button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {meta.totalPages > 1 && (
+          <div className="card-footer um-pagination">
+            <button className="btn btn-ghost btn-sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Trước</button>
+            <span className="um-page-info">Trang {meta.page} / {meta.totalPages}</span>
+            <button className="btn btn-ghost btn-sm" disabled={page >= meta.totalPages} onClick={() => setPage((p) => p + 1)}>Sau →</button>
+          </div>
+        )}
       </div>
-
-      {isLoading ? (
-        <div className="um-table-wrap">
-          <table className="um-table">
-            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th>Đăng nhập cuối</th><th>Hành động</th></tr></thead>
-            <tbody>
-              {[...Array(5)].map((_, i) => (
-                <tr key={i}>{[...Array(7)].map((_, j) => (<td key={j}><div className="skeleton" style={{ height: 18, borderRadius: 4 }} /></td>))}</tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : error ? (
-        <div className="um-empty"><p>Không thể tải danh sách users</p><button className="btn btn-primary" onClick={() => window.location.reload()}>Thử lại</button></div>
-      ) : users.length === 0 ? (
-        <div className="um-empty"><p>Không tìm thấy user nào</p></div>
-      ) : (
-        <div className="um-table-wrap">
-          <table className="um-table">
-            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th>Đăng nhập cuối</th><th>Hành động</th></tr></thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className={!user.isActive ? 'row-inactive' : ''}>
-                  <td className="cell-id">{user.id}</td>
-                  <td>
-                    <div className="user-info">
-                      <div className="user-avatar">
-                        {user.avatar ? <img src={user.avatar} alt={user.username} /> : <span>{user.username?.charAt(0).toUpperCase()}</span>}
-                      </div>
-                      <span className="user-name">{user.username}</span>
-                    </div>
-                  </td>
-                  <td className="cell-email">{user.email}</td>
-                  <td>
-                    {editingUser === user.id ? (
-                      <select className="input input-mini" defaultValue={user.role} onChange={(e) => handleUpdateUser(user.id, { role: e.target.value })}>
-                        <option value="user">user</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    ) : (
-                      <span className={`role-badge role-badge--${user.role}`}>{user.role}</span>
-                    )}
-                  </td>
-                  <td>
-                    <button className={`status-toggle ${user.isActive ? 'active' : 'inactive'}`} onClick={() => handleUpdateUser(user.id, { isActive: !user.isActive })} title={user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}>
-                      {user.isActive ? <><HiCheck size={14} /> Active</> : <><HiXMark size={14} /> Inactive</>}
-                    </button>
-                  </td>
-                  <td className="cell-date">
-                    {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
-                  </td>
-                  <td className="cell-actions">
-                    <button className="btn-icon" onClick={() => setEditingUser(editingUser === user.id ? null : user.id)} title="Sửa role"><HiPencil size={16} /></button>
-                    {confirmDelete === user.id ? (
-                      <div className="confirm-delete">
-                        <button className="btn btn-sm" style={{ background: 'var(--color-error)', color:'#fff' }} onClick={() => handleDeleteUser(user.id)} disabled={deleteUser.isPending}>Xác nhận</button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setConfirmDelete(null)}>Hủy</button>
-                      </div>
-                    ) : (
-                      <button className="btn-icon btn-icon--danger" onClick={() => setConfirmDelete(user.id)} title="Xóa user"><HiTrash size={16} /></button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {meta.totalPages > 1 && (
-        <div className="um-pagination">
-          <button className="btn btn-ghost btn-sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>← Trước</button>
-          <span className="um-page-info">Trang {meta.page} / {meta.totalPages}</span>
-          <button className="btn btn-ghost btn-sm" disabled={page >= meta.totalPages} onClick={() => setPage((p) => p + 1)}>Sau →</button>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
