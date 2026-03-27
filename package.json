@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "admin"
   ],
   "scripts": {
     "dev": "turbo run dev",
@@ -12,7 +13,8 @@
     "lint": "turbo run lint",
     "clean": "turbo run clean",
     "server:dev": "turbo run dev --filter=@anime3d-chill/server",
-    "client:dev": "turbo run dev --filter=@anime3d-chill/client"
+    "client:dev": "turbo run dev --filter=@anime3d-chill/client",
+    "admin:dev": "turbo run dev --filter=@anime3d-chill/admin"
   },
   "devDependencies": {
     "turbo": "^2.5.0"

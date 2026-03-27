@@ -7,6 +7,7 @@ const express = require('express');
 const authRoutes = require('./authRoutes');
 const movieRoutes = require('./movieRoutes');
 const meRoutes = require('./meRoutes');
+const adminRoutes = require('./adminRoutes');
 
 const router = express.Router();
 
@@ -14,9 +15,7 @@ const router = express.Router();
 router.use('/auth', authRoutes);
 router.use('/movies', movieRoutes);
 router.use('/me', meRoutes);
-
-// ── Future routes ───────────────────────────────────────────
-// router.use('/admin', adminRoutes);      // Ngày 15
+router.use('/admin', adminRoutes);
 
 module.exports = router;
 

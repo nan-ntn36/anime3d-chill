@@ -373,17 +373,17 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 15 · Admin Dashboard
 
 **Module: Admin Backend**
-- [ ] `src/controllers/userController.js`:
-  - [ ] GET users (phân trang + search)
-  - [ ] GET user by ID
-  - [ ] PATCH user (update role, active status)
-  - [ ] DELETE user (soft delete)
-- [ ] `src/routes/v1/adminRoutes.js` — mount routes (yêu cầu admin role)
-- [ ] `GET /api/v1/admin/stats` — tổng user, phim xem nhiều, v.v.
+- [x] `src/controllers/userController.js`:
+  - [x] GET users (phân trang + search)
+  - [x] GET user by ID
+  - [x] PATCH user (update role, active status)
+  - [x] DELETE user (soft delete)
+- [x] `src/routes/v1/adminRoutes.js` — mount routes (yêu cầu admin role)
+- [x] `GET /api/v1/admin/stats` — tổng user, phim xem nhiều, v.v.
 
 **Module: Admin Frontend**
-- [ ] `src/pages/admin/AdminDashboard.jsx` — thống kê tổng quan
-- [ ] `src/pages/admin/UserManagement.jsx` — bảng user, CRUD actions
+- [x] `src/pages/admin/AdminDashboard.jsx` — thống kê tổng quan
+- [x] `src/pages/admin/UserManagement.jsx` — bảng user, CRUD actions
 
 ---
 

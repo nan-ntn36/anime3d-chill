@@ -73,7 +73,7 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_me}
       JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-30d}
-      CLIENT_URL: http://localhost:3000
+      CLIENT_URL: http://localhost:3000,http://localhost:3001
       KKPHIM_API_URL: https://phimapi.com
       LOG_LEVEL: debug
     ports:
@@ -104,6 +104,27 @@ services:
       - "3000:3000"
     volumes:
       - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  # ── Admin CMS (Vite + React) ───────────────
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      target: dev
+    container_name: anime3d-admin
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://anime3d-server:5000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./admin:/app
       - /app/node_modules
     depends_on:
       - server

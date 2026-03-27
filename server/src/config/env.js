@@ -55,8 +55,11 @@ const env = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   },
 
-  // CORS
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+  // CORS — support comma-separated origins (e.g. "http://localhost:3000,http://localhost:3001")
+  clientUrl: (process.env.CLIENT_URL || 'http://localhost:3000')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean),
 
   // External API
   kkphimApiUrl: process.env.KKPHIM_API_URL || 'https://phimapi.com',

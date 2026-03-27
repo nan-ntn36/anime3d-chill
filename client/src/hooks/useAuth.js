@@ -36,7 +36,7 @@ export default function useAuth() {
         }
 
         const { data } = await authApi.getMe();
-        const userData = data.data;
+        const userData = data.data.user ?? data.data;
         useAuthStore.getState().setAuth({
           user: userData,
           accessToken: useAuthStore.getState().accessToken,

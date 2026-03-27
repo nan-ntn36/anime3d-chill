@@ -25,19 +25,7 @@ async function seedUsers(User) {
         email: 'admin@anime3d.local',
         password: adminPassword,
         role: 'admin',
-      },
-      {
-        username: 'testuser1',
-        email: 'user1@anime3d.local',
-        password: 'User@123',
-        role: 'user',
-      },
-      {
-        username: 'testuser2',
-        email: 'user2@anime3d.local',
-        password: 'User@123',
-        role: 'user',
-      },
+      }
     ];
 
     // bulkCreate sẽ không trigger hooks (beforeCreate), hash thủ công
