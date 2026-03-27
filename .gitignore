@@ -42,3 +42,4 @@ temp/
 .agent/
 _agents/
 _agent/
+.env.production
