@@ -390,16 +390,16 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 16 · Profile & Continue Watching
 
 **Module: Profile**
-- [ ] `src/pages/ProfilePage.jsx`:
-  - [ ] Hiển thị thông tin user (username, email, avatar)
-  - [ ] Form cập nhật profile (React Hook Form)
-  - [ ] Tab: Yêu thích, Lịch sử xem
-  - [ ] Phân trang cho từng tab
+- [x] `src/pages/ProfilePage.jsx`:
+  - [x] Hiển thị thông tin user (username, email, avatar)
+  - [x] Form cập nhật profile (React Hook Form)
+  - [x] Tab: Yêu thích, Lịch sử xem
+  - [x] Phân trang cho từng tab
 
 **Module: Xem Tiếp (Continue Watching)**
-- [ ] Section "Đang Xem" trên trang chủ với thanh progress
-- [ ] Prompt "Xem tiếp từ phút X:XX?" trên trang chi tiết/player
-- [ ] Nút: Xem tiếp / Xem từ đầu
+- [x] Section "Đang Xem" trên trang chủ với thanh progress
+- [x] Prompt "Xem tiếp từ phút X:XX?" trên trang chi tiết/player
+- [x] Nút: Xem tiếp / Xem từ đầu
 
 ---
 

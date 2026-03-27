@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import HeroBanner from '@components/home/HeroBanner';
 import GenreCards from '@components/home/GenreCards';
+import ContinueWatching from '@components/home/ContinueWatching';
 import MovieCarousel from '@components/movie/MovieCarousel';
 import MovieCard from '@components/movie/MovieCard';
 import Pagination from '@components/ui/Pagination';
@@ -40,6 +41,9 @@ export default function Home() {
 
       {/* Genre Cards */}
       <GenreCards />
+
+      {/* Continue Watching — Đang Xem */}
+      <ContinueWatching />
 
       {/* Main content */}
       <div className="home container">

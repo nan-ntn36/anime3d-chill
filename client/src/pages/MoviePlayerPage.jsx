@@ -6,7 +6,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { FiMonitor, FiChevronRight } from 'react-icons/fi';
+import { FiMonitor, FiChevronRight, FiPlay, FiRotateCcw } from 'react-icons/fi';
 import { useMovieDetail } from '@/hooks/useMovies';
 import usePlayerStore from '@/store/playerStore';
 import MoviePlayer from '@/components/movie/MoviePlayer';
@@ -21,6 +21,15 @@ import { saveProgress, getProgress, saveWatchVisit } from '@/services/watchProgr
 function stripHtml(html) {
   if (!html) return '';
   return html.replace(/<[^>]*>/g, '').trim();
+}
+
+function formatSeconds(s) {
+  if (!s) return '0:00';
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+  return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
 export default function MoviePlayerPage() {
@@ -62,11 +71,24 @@ export default function MoviePlayerPage() {
   const { currentTime, duration } = usePlayerStore();
   const lastSavedTime = useRef(0);
 
-  // Lấy startTime khi load phim
+  // Resume prompt state
+  const [showResumePrompt, setShowResumePrompt] = useState(false);
+  const [resumeFrom, setResumeFrom] = useState(0);
+  const [userStartTime, setUserStartTime] = useState(0);
+
+  // Lấy startTime khi load phim — show resume prompt if > 60s
   const startTime = useMemo(() => {
     if (!movie || !currentEp) return 0;
     const progress = getProgress(movie.slug, currentEp.slug);
-    return progress?.currentTime || 0;
+    const savedTime = progress?.currentTime || 0;
+    const savedDuration = progress?.duration || 0;
+    // Show prompt if saved progress > 60s and not near the end
+    if (savedTime > 60 && savedDuration > 0 && (savedDuration - savedTime) > 30) {
+      setResumeFrom(savedTime);
+      setShowResumePrompt(true);
+      return 0; // don't auto-resume, wait for user choice
+    }
+    return savedTime;
   }, [movie, currentEp]);
 
   // Lưu tiến độ định kỳ (Mỗi 15s hoặc khi gần hết video) — chỉ hoạt động với m3u8 mode
@@ -193,13 +215,44 @@ export default function MoviePlayerPage() {
       </Helmet>
 
       <div className={`player-page ${isTheaterMode ? 'player-page--theater' : ''}`}>
+        {/* ── Resume Prompt ──────────────────────────── */}
+        {showResumePrompt && (
+          <div className="resume-prompt">
+            <div className="resume-prompt__content">
+              <span className="resume-prompt__text">
+                Bạn đã xem đến {formatSeconds(resumeFrom)} — Xem tiếp?
+              </span>
+              <div className="resume-prompt__actions">
+                <button
+                  className="btn btn-primary resume-prompt__btn"
+                  onClick={() => {
+                    setUserStartTime(resumeFrom);
+                    setShowResumePrompt(false);
+                  }}
+                >
+                  <FiPlay size={14} /> Xem tiếp
+                </button>
+                <button
+                  className="btn btn-outline resume-prompt__btn"
+                  onClick={() => {
+                    setUserStartTime(0);
+                    setShowResumePrompt(false);
+                  }}
+                >
+                  <FiRotateCcw size={14} /> Xem từ đầu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Player Section ───────────────────────────── */}
         <div className="player-page__main">
           <PlayerErrorBoundary>
             <MoviePlayer
               m3u8Url={m3u8Url}
               embedUrl={embedUrl}
-              startTime={startTime}
+              startTime={showResumePrompt ? 0 : (userStartTime || startTime)}
               onEnded={handleNextEpisode}
               onProgress80={handleProgress80}
               onSwitchServer={episodes.length > 1 ? handleSwitchServer : undefined}

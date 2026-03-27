@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FiUser, FiClock, FiHeart, FiSettings } from 'react-icons/fi';
+import { FiUser, FiClock, FiHeart, FiSettings, FiSave, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import useAuthStore from '@/store/authStore';
 import useAuth from '@/hooks/useAuth';
 import userApi from '@/api/userApi';
@@ -10,7 +11,7 @@ import Pagination from '@/components/ui/Pagination';
 import './Profile.css';
 
 export default function Profile() {
-  const { user } = useAuthStore();
+  const { user, setUser } = useAuthStore();
   const { logout, isLoggingOut } = useAuth();
   const [activeTab, setActiveTab] = useState('history');
 
@@ -51,6 +52,73 @@ export default function Profile() {
     poster: item.movieThumb,
     currentEpisode: item.episode || '',
   });
+
+  // ── Settings Form State ──────────────────────────
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar || '');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveProfile = useCallback(async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+
+    try {
+      const payload = {};
+
+      // Avatar update
+      if (avatarUrl && avatarUrl !== user?.avatar) {
+        payload.avatar = avatarUrl;
+      }
+
+      // Password change
+      if (newPassword) {
+        if (!oldPassword) {
+          toast.error('Vui lòng nhập mật khẩu cũ');
+          setIsSaving(false);
+          return;
+        }
+        if (newPassword.length < 6) {
+          toast.error('Mật khẩu mới phải từ 6 ký tự');
+          setIsSaving(false);
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast.error('Mật khẩu xác nhận không khớp');
+          setIsSaving(false);
+          return;
+        }
+        payload.oldPassword = oldPassword;
+        payload.newPassword = newPassword;
+      }
+
+      if (Object.keys(payload).length === 0) {
+        toast('Không có thay đổi nào', { icon: '💡' });
+        setIsSaving(false);
+        return;
+      }
+
+      const { data } = await userApi.updateProfile(payload);
+      const updatedUser = data.data;
+
+      // Update store
+      if (updatedUser) {
+        setUser({ ...user, ...updatedUser });
+      }
+
+      toast.success('Cập nhật thành công!');
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Lỗi cập nhật tài khoản');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [avatarUrl, oldPassword, newPassword, confirmPassword, user, setUser]);
 
   return (
     <>
@@ -150,11 +218,86 @@ export default function Profile() {
 
           {activeTab === 'settings' && (
             <div className="profile-section">
-              <h3 className="profile-section-title">Quản Lý Thông Tin</h3>
-              <div className="coming-soon">
-                <FiSettings style={{ fontSize: '3rem', color: 'var(--color-border)', marginBottom: '1rem' }} />
-                <p className="text-muted">Chức năng cập nhật Avatar & Đổi mật khẩu đang được lập trình.</p>
-              </div>
+              <h3 className="profile-section-title">Quản Lý Tài Khoản</h3>
+
+              <form className="settings-form" onSubmit={handleSaveProfile}>
+                {/* Avatar */}
+                <div className="settings-group">
+                  <h4 className="settings-group__title">Ảnh đại diện</h4>
+                  <div className="settings-avatar-row">
+                    <div className="settings-avatar-preview">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="Preview" onError={(e) => { e.target.style.display = 'none'; }} />
+                      ) : (
+                        <FiUser size={32} />
+                      )}
+                    </div>
+                    <div className="settings-avatar-input">
+                      <input
+                        type="url"
+                        className="form-input"
+                        placeholder="https://example.com/avatar.jpg"
+                        value={avatarUrl}
+                        onChange={(e) => setAvatarUrl(e.target.value)}
+                      />
+                      <p className="form-hint">Nhập URL ảnh (Imgur, ImgBB, v.v.)</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="settings-group">
+                  <h4 className="settings-group__title">Đổi mật khẩu</h4>
+                  
+                  <div className="form-field">
+                    <label>Mật khẩu hiện tại</label>
+                    <div className="form-input-wrap">
+                      <input
+                        type={showOld ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="Nhập mật khẩu cũ"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                      />
+                      <button type="button" className="form-input-toggle" onClick={() => setShowOld(!showOld)}>
+                        {showOld ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label>Mật khẩu mới</label>
+                    <div className="form-input-wrap">
+                      <input
+                        type={showNew ? 'text' : 'password'}
+                        className="form-input"
+                        placeholder="Tối thiểu 6 ký tự"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button type="button" className="form-input-toggle" onClick={() => setShowNew(!showNew)}>
+                        {showNew ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-field">
+                    <label>Xác nhận mật khẩu mới</label>
+                    <input
+                      type="password"
+                      className="form-input"
+                      placeholder="Nhập lại mật khẩu mới"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-primary btn-save" disabled={isSaving}>
+                  <FiSave size={16} />
+                  {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                </button>
+              </form>
             </div>
           )}
         </main>
