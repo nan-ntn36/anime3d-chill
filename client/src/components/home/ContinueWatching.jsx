@@ -58,15 +58,7 @@ export default function ContinueWatching() {
     }
   };
 
-  console.log('cw items:', items);
-
-  if (items.length === 0) {
-    return (
-      <section className="cw-section" style={{ border: '2px solid red', padding: 20 }}>
-        <h2 style={{color: 'white'}}>DEBUG: Đang Xem is EMPTY</h2>
-      </section>
-    );
-  }
+  if (items.length === 0) return null;
 
 
   return (
