@@ -1,11 +1,7 @@
-/**
- * HomePage — Trang chủ: hero banner, anime grid, genre cards, movie sections
- * Layout theo webfilm-swart.vercel.app reference
- */
-
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import HeroBanner from '@components/home/HeroBanner';
+import TrendingSection from '@components/home/TrendingSection';
 import GenreCards from '@components/home/GenreCards';
 import ContinueWatching from '@components/home/ContinueWatching';
 import MovieCarousel from '@components/movie/MovieCarousel';
@@ -38,6 +34,9 @@ export default function Home() {
         movies={movies}
         loading={newMovies.isLoading}
       />
+
+      {/* Trending Section — Phim Thịnh Hành */}
+      <TrendingSection />
 
       {/* Genre Cards */}
       <GenreCards />

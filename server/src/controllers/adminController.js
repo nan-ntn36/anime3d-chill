@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
 
 /**
  * GET /api/v1/admin/stats
- * Trả về thống kê tổng quan
+ * Trả về thống kê tổng quan + dữ liệu biểu đồ
  */
 exports.getStats = async (req, res, next) => {
   try {
@@ -22,7 +22,9 @@ exports.getStats = async (req, res, next) => {
       newUsersThisWeek,
       totalFavorites,
       totalViews,
+      totalWatchHistory,
       topMovies,
+      viewsPerDay,
     ] = await Promise.all([
       // Tổng users (không tính soft-deleted)
       User.count({ where: { deletedAt: null } }),
@@ -41,7 +43,10 @@ exports.getStats = async (req, res, next) => {
       // Tổng lượt xem phim
       MovieView.count(),
 
-      // Top 5 phim xem nhiều nhất (30 ngày gần)
+      // Tổng records lịch sử xem
+      WatchHistory.count(),
+
+      // Top 10 phim xem nhiều nhất (30 ngày gần)
       MovieView.findAll({
         attributes: [
           'movieSlug',
@@ -54,7 +59,21 @@ exports.getStats = async (req, res, next) => {
         },
         group: ['movieSlug'],
         order: [[literal('viewCount'), 'DESC']],
-        limit: 5,
+        limit: 10,
+        raw: true,
+      }),
+
+      // Lượt xem mỗi ngày trong 7 ngày qua (cho biểu đồ)
+      MovieView.findAll({
+        attributes: [
+          [fn('DATE', col('viewed_at')), 'date'],
+          [fn('COUNT', col('id')), 'count'],
+        ],
+        where: {
+          viewedAt: { [Op.gte]: sevenDaysAgo },
+        },
+        group: [fn('DATE', col('viewed_at'))],
+        order: [[fn('DATE', col('viewed_at')), 'ASC']],
         raw: true,
       }),
     ]);
@@ -66,7 +85,9 @@ exports.getStats = async (req, res, next) => {
         newUsersThisWeek,
         totalFavorites,
         totalViews,
+        totalWatchHistory,
         topMovies,
+        viewsPerDay,
       },
     });
   } catch (error) {

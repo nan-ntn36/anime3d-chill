@@ -76,6 +76,18 @@ const router = Router();
 
 /**
  * @swagger
+ * /api/v1/movies/trending:
+ *   get:
+ *     summary: Top phim thịnh hành (cache 15 phút)
+ *     tags: [Movies]
+ *     responses:
+ *       200:
+ *         description: Danh sách phim trending với lượt xem
+ */
+router.get('/trending', movieController.getTrending);
+
+/**
+ * @swagger
  * /api/v1/movies/new:
  *   get:
  *     summary: Phim mới cập nhật

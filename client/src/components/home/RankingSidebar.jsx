@@ -1,12 +1,43 @@
+/**
+ * RankingSidebar — BXH Phim Hot
+ * Sử dụng trending data thật từ analytics (Day 17)
+ * Fallback: useNewMovies nếu trending chưa có data
+ */
+
 import { Link } from 'react-router-dom';
-import { useNewMovies } from '@/hooks/useMovies';
+import { FiEye } from 'react-icons/fi';
+import { useTrendingMovies, useNewMovies } from '@/hooks/useMovies';
 import './RankingSidebar.css';
 
-export default function RankingSidebar({ title = "BẢNG XẾP HẠNG" }) {
-  // We use useNewMovies or potentially a top-rated endpoint if we had one.
-  // Using useNewMovies for now to mock the leaderboard.
-  const { data, isLoading } = useNewMovies(1);
-  const movies = data?.items?.slice(0, 10) || [];
+/**
+ * Format view count: 1234 → "1.2K"
+ */
+function formatViews(count) {
+  if (!count) return null;
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+  return count.toString();
+}
+
+export default function RankingSidebar({ title = "BXH PHIM HOT" }) {
+  const trending = useTrendingMovies();
+  const fallback = useNewMovies(1);
+
+  // Ưu tiên trending data, fallback sang newMovies
+  const hasTrending = trending.data?.items?.length > 0;
+  const isLoading = hasTrending ? false : fallback.isLoading;
+
+  const movies = hasTrending
+    ? trending.data.items.slice(0, 10).map((m) => ({
+        slug: m.movieSlug,
+        title: m.title || m.movieSlug,
+        thumb: m.thumb,
+        poster: m.poster,
+        year: m.year,
+        quality: m.quality,
+        viewCount: m.viewCount,
+      }))
+    : (fallback.data?.items?.slice(0, 10) || []);
 
   if (isLoading) {
     return (
@@ -28,6 +59,7 @@ export default function RankingSidebar({ title = "BẢNG XẾP HẠNG" }) {
         {movies.map((movie, index) => {
           const rank = index + 1;
           const rankColorClass = rank <= 3 ? `rank-${rank}` : 'rank-normal';
+          const views = formatViews(movie.viewCount);
           
           return (
             <Link to={`/phim/${movie.slug}`} key={movie.slug} className="ranking-card">
@@ -47,6 +79,11 @@ export default function RankingSidebar({ title = "BẢNG XẾP HẠNG" }) {
                 <div className="ranking-card__meta">
                   {movie.year && <span>{movie.year}</span>}
                   {movie.quality && <span className="quality">{movie.quality}</span>}
+                  {views && (
+                    <span className="ranking-card__views">
+                      <FiEye size={10} /> {views}
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>

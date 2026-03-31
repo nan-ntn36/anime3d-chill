@@ -104,3 +104,11 @@
   padding: 1px 4px;
   border-radius: 4px;
 }
+
+.ranking-card__views {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #ff6b35;
+  font-weight: 600;
+}

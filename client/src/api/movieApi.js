@@ -62,6 +62,11 @@ const movieApi = {
    * @param {{ movieSlug: string, sessionId: string }} data
    */
   recordView: (data) => api.post('/movies/view', data),
+
+  /**
+   * Phim thịnh hành (trending, cache 15 phút)
+   */
+  getTrending: () => api.get('/movies/trending'),
 };
 
 export default movieApi;

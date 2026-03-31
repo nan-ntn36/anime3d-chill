@@ -406,14 +406,14 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 17 · Analytics & Trending
 
 **Module: Analytics Backend**
-- [ ] Ghi `movie_views` khi user vào trang chi tiết (dedupe bằng session_id)
-- [ ] `GET /api/v1/movies/trending` — top phim, cache 15 phút
-- [ ] Cron job `updateTrending` — aggregate `movie_views` mỗi 15 phút
-- [ ] `src/jobs/cleanOldHistory.js` — dọn history cũ > 1 năm (weekly)
+- [x] Ghi `movie_views` khi user vào trang chi tiết (dedupe bằng session_id)
+- [x] `GET /api/v1/movies/trending` — top phim, cache 15 phút
+- [x] Cron job `updateTrending` — aggregate `movie_views` mỗi 15 phút
+- [x] `src/jobs/cleanOldHistory.js` — dọn history cũ > 1 năm (weekly)
 
 **Module: Analytics Frontend**
-- [ ] Section "Trending" trên trang chủ
-- [ ] Admin stats: tổng lượt xem, top phim, biểu đồ
+- [x] Section "Trending" trên trang chủ
+- [x] Admin stats: tổng lượt xem, top phim, biểu đồ
 
 ---
 

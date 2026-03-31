@@ -21,8 +21,7 @@ import {
 } from 'react-icons/fi';
 import { FaHeart } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import { useMovieDetail } from '@/hooks/useMovies';
-import { useFavoriteToggle } from '@/hooks/useMovies';
+import { useMovieDetail, useFavoriteToggle, useRecordView } from '@/hooks/useMovies';
 import useAuthStore from '@/store/authStore';
 import CommentSection from '@/components/movie/CommentSection';
 import RankingSidebar from '@/components/home/RankingSidebar';
@@ -88,6 +87,9 @@ export default function MovieDetail() {
   // ── Data fetching ──────────────────────────────────────
   const { data: movie, isLoading, isError, error, refetch } = useMovieDetail(slug);
   const { toggle: toggleFavorite, isFavorited, isPending: favPending } = useFavoriteToggle(movie);
+
+  // Ghi nhận lượt xem khi vào trang chi tiết (Day 17 — Analytics)
+  useRecordView(slug);
 
   // ── Local state ────────────────────────────────────────
   const [selectedServer, setSelectedServer] = useState(0);

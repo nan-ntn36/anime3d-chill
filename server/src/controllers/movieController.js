@@ -9,8 +9,10 @@ const { sendSuccess } = require('../utils/response');
 const { validationResult } = require('express-validator');
 const { AppError } = require('../middleware/errorHandler');
 const { MovieView } = require('../models');
-const { Op } = require('sequelize');
+const { Op, fn, col, literal } = require('sequelize');
 const logger = require('../utils/logger');
+const { cacheGet, cacheSet } = require('../utils/cache');
+const { TRENDING_CACHE_KEY, TRENDING_TTL } = require('../jobs/updateTrending');
 
 /**
  * Helper: kiểm tra validation errors
@@ -239,6 +241,89 @@ async function recordView(req, res, next) {
   }
 }
 
+/**
+ * GET /movies/trending
+ * Top phim theo lượt xem (cache 15 phút)
+ * Cache-first: Redis → DB aggregate → lưu cache
+ */
+async function getTrending(req, res, next) {
+  try {
+    // 1. Thử đọc từ cache
+    let trendingData = await cacheGet(TRENDING_CACHE_KEY);
+
+    // 2. Fallback: aggregate trực tiếp từ DB
+    if (!trendingData || trendingData.length === 0) {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+      const trending = await MovieView.findAll({
+        attributes: [
+          'movieSlug',
+          [fn('COUNT', col('id')), 'viewCount'],
+          [fn('MAX', col('viewed_at')), 'lastViewedAt'],
+        ],
+        where: {
+          viewedAt: { [Op.gte]: sevenDaysAgo },
+        },
+        group: ['movieSlug'],
+        order: [[literal('viewCount'), 'DESC']],
+        limit: 20,
+        raw: true,
+      });
+
+      trendingData = trending.map((item, index) => ({
+        rank: index + 1,
+        movieSlug: item.movieSlug,
+        viewCount: parseInt(item.viewCount, 10),
+        lastViewedAt: item.lastViewedAt,
+      }));
+
+      // Lưu cache cho lần request kế
+      if (trendingData.length > 0) {
+        await cacheSet(TRENDING_CACHE_KEY, trendingData, TRENDING_TTL);
+      }
+    }
+
+    // 3. Enrich: lấy detail cho top phim từ KKPhim API
+    const enrichedItems = await Promise.allSettled(
+      trendingData.slice(0, 10).map(async (item) => {
+        try {
+          const detail = await kkphimService.getMovieDetail(item.movieSlug);
+          return {
+            ...item,
+            title: detail?.title || item.movieSlug,
+            originalTitle: detail?.originalTitle || '',
+            poster: detail?.poster || '',
+            thumb: detail?.thumb || '',
+            year: detail?.year || null,
+            quality: detail?.quality || '',
+            language: detail?.language || '',
+            currentEpisode: detail?.currentEpisode || '',
+            genres: detail?.genres || [],
+            country: detail?.country || [],
+          };
+        } catch {
+          // Nếu không lấy được detail → trả basic data
+          return {
+            ...item,
+            title: item.movieSlug,
+            poster: '',
+            thumb: '',
+          };
+        }
+      })
+    );
+
+    const items = enrichedItems
+      .filter((r) => r.status === 'fulfilled')
+      .map((r) => r.value);
+
+    sendSuccess(res, { items, total: trendingData.length });
+  } catch (error) {
+    logger.error(`[MovieController.getTrending] Error: ${error.message}`);
+    next(error);
+  }
+}
+
 module.exports = {
   getNewMovies,
   getAllMovies,
@@ -251,4 +336,5 @@ module.exports = {
   getGenres,
   getCountries,
   recordView,
+  getTrending,
 };

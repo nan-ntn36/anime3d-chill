@@ -3,11 +3,12 @@
  * Cache-first, auto-refetch, stale time management
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import movieApi from '@/api/movieApi';
 import userApi from '@/api/userApi';
 import useAuthStore from '@/store/authStore';
+import { getGuestId } from '@/services/guestId';
 import toast from 'react-hot-toast';
 
 /**
@@ -196,4 +197,43 @@ export function useFavoriteToggle(movie) {
     isFavorited,
     isPending: addMutation.isPending || removeMutation.isPending,
   };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Trending Movies Hook — Day 17
+   ═══════════════════════════════════════════════════════════ */
+
+/**
+ * Phim thịnh hành (trending) — cache 15 phút
+ */
+export function useTrendingMovies() {
+  return useQuery({
+    queryKey: ['movies', 'trending'],
+    queryFn: () => movieApi.getTrending().then((r) => r.data.data),
+    staleTime: 15 * 60 * 1000, // 15 phút — khớp với backend cache
+    gcTime: 30 * 60 * 1000,
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Record View Hook — Day 17
+   ═══════════════════════════════════════════════════════════ */
+
+/**
+ * Ghi nhận lượt xem phim — fire-and-forget
+ * Deduplicate: chỉ ghi 1 lần mỗi slug trong session component
+ * @param {string} movieSlug
+ */
+export function useRecordView(movieSlug) {
+  const hasRecorded = useRef(false);
+
+  useEffect(() => {
+    if (!movieSlug || hasRecorded.current) return;
+    hasRecorded.current = true;
+
+    const sessionId = getGuestId();
+    movieApi.recordView({ movieSlug, sessionId }).catch(() => {
+      // Silent fail — analytics không nên block UX
+    });
+  }, [movieSlug]);
 }
