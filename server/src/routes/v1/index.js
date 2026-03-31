@@ -16,6 +16,7 @@ router.use('/auth', authRoutes);
 router.use('/movies', movieRoutes);
 router.use('/me', meRoutes);
 router.use('/admin', adminRoutes);
+router.use('/comments', require('./commentRoutes'));
 
 module.exports = router;
 

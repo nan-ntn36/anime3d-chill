@@ -12,6 +12,7 @@ const RefreshTokenDef = require('./RefreshToken');
 const FavoriteDef = require('./Favorite');
 const WatchHistoryDef = require('./WatchHistory');
 const MovieViewDef = require('./MovieView');
+const CommentDef = require('./Comment');
 
 // Initialize models
 const User = UserDef(sequelize);
@@ -19,6 +20,7 @@ const RefreshToken = RefreshTokenDef(sequelize);
 const Favorite = FavoriteDef(sequelize);
 const WatchHistory = WatchHistoryDef(sequelize);
 const MovieView = MovieViewDef(sequelize);
+const Comment = CommentDef(sequelize);
 
 // ── Associations ────────────────────────────────────────────
 
@@ -66,6 +68,28 @@ MovieView.belongsTo(User, {
   as: 'user',
 });
 
+// User → Comment (1:N)
+User.hasMany(Comment, {
+  foreignKey: 'user_id',
+  as: 'comments',
+  onDelete: 'CASCADE',
+});
+Comment.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+});
+
+// Comment → Comment (1:N for Replies)
+Comment.hasMany(Comment, {
+  foreignKey: 'parent_id',
+  as: 'replies',
+  onDelete: 'CASCADE',
+});
+Comment.belongsTo(Comment, {
+  foreignKey: 'parent_id',
+  as: 'parent',
+});
+
 /**
  * Sync all models with database
  * @param {object} options - Sequelize sync options
@@ -87,5 +111,6 @@ module.exports = {
   Favorite,
   WatchHistory,
   MovieView,
+  Comment,
   syncModels,
 };

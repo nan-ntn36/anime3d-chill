@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FiStar, FiMessageCircle } from 'react-icons/fi';
 import { useNewMovies } from '@/hooks/useMovies';
+import { useRecentComments } from '@/hooks/useComments';
 import './TopRankingFooter.css';
 
 const GENRE_TAGS = [
@@ -11,15 +12,10 @@ const GENRE_TAGS = [
   { name: 'Tình Cảm', slug: 'tinh-cam', color: '#ec4899' },
 ];
 
-const MOCK_COMMENTS = [
-  { user: 'LUFFY_D_MŨ_CỐI', text: '"Ae xem phim ở đây mượt thật, server VIP quá..."' },
-  { user: 'NARUTO_FAN_99', text: '"Anime 3D chất lượng 4K mượt mà, quá đỉnh..."' },
-  { user: 'ZORO_HUNTER', text: '"Server nhanh, không lag, xem cực phê..."' },
-  { user: 'SAKURA_CHAN', text: '"Phim hay quá, cập nhật nhanh lắm..."' },
-];
-
 export default function TopRankingFooter() {
   const { data } = useNewMovies(1);
+  const recentComments = useRecentComments(4); // fetch 4 comments mới nhất
+  
   const hotMovies = data?.items?.slice(0, 5) || [];
   const topMovies = data?.items?.slice(5, 10) || [];
 
@@ -92,15 +88,44 @@ export default function TopRankingFooter() {
               <span className="top-footer__icon"><FiMessageCircle /></span> BÌNH LUẬN MỚI
             </h3>
             <div className="top-footer__cards">
-              {MOCK_COMMENTS.map((c, i) => (
-                <div key={i} className="comment-mini-card">
-                  <div className="comment-mini-card__avatar">👤</div>
-                  <div className="comment-mini-card__body">
-                    <span className="comment-mini-card__user">{c.user}</span>
-                    <span className="comment-mini-card__text">{c.text}</span>
-                  </div>
-                </div>
-              ))}
+              {recentComments.isLoading ? (
+                <div style={{ color: 'var(--color-text-muted)' }}>Đang tải bình luận...</div>
+              ) : recentComments.data?.length > 0 ? (
+                recentComments.data.map((c) => {
+                  // Tính thời gian relative (vừa xong, x giờ trước)
+                  const d = new Date(c.createdAt);
+                  const now = new Date();
+                  const diffMinutes = Math.floor((now - d) / 60000);
+                  let timeAgo = '';
+                  if (diffMinutes < 1) timeAgo = 'Vừa xong';
+                  else if (diffMinutes < 60) timeAgo = `${diffMinutes} phút trước`;
+                  else if (diffMinutes < 1440) timeAgo = `${Math.floor(diffMinutes / 60)} giờ trước`;
+                  else timeAgo = d.toLocaleDateString();
+
+                  return (
+                    <div key={c.id} className="comment-mini-card">
+                      <div className="comment-mini-card__avatar">
+                        {c.user?.avatar ? (
+                          <img src={c.user.avatar} alt="avatar" style={{width: '100%', height:'100%', borderRadius:'50%', objectFit:'cover'}} />
+                        ) : (
+                          <span>{c.user?.username?.charAt(0) || 'U'}</span>
+                        )}
+                      </div>
+                      <div className="comment-mini-card__body">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span className="comment-mini-card__user">{c.user?.username || 'Ẩn danh'}</span>
+                          <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>{timeAgo}</span>
+                        </div>
+                        <span className="comment-mini-card__text">
+                          "{c.content.length > 50 ? c.content.substring(0, 50) + '...' : c.content}"
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>Chưa có bình luận nào.</div>
+              )}
             </div>
           </div>
         </div>

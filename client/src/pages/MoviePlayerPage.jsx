@@ -340,9 +340,8 @@ export default function MoviePlayerPage() {
           </aside>
         </div>
         
-        {/* Comments Section */}
         <div className="player-page__comments" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 var(--space-4)', width: '100%' }}>
-          <CommentSection />
+          <CommentSection movieSlug={slug} />
         </div>
       </div>
     </>

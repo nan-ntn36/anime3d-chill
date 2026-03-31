@@ -368,7 +368,7 @@ export default function MovieDetail() {
               </div>
             )}
             
-            <CommentSection />
+            <CommentSection movieSlug={slug} />
           </div>
 
           {/* Right Column: Episodes & Ranking */}

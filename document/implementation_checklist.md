@@ -434,6 +434,32 @@ Thêm vào cuối mỗi ngày làm việc:
 - [x] Focus visible outline
 - [x] Skip-to-content link
 
+## Tính Năng Bổ Sung · Bình luận (Comments)
+
+**Module: Data Model (Backend)**
+- [x] `src/models/Comment.js` — khai báo Sequelize schema (`content`, `userId`, `movieSlug`, `parentId`).
+- [x] Xây dựng Relationships: `User.hasMany(Comment)`, `Comment.belongsTo(User)`.
+- [x] (Tuỳ chọn) Chạy lệnh sync models hoặc add Database Migration.
+
+**Module: API Layer (Backend)**
+- [x] `src/validators/commentValidators.js` — kiểm duyệt độ dài và sanitization (chống XSS).
+- [x] `src/controllers/commentController.js`:
+  - [x] `getMovieComments`: Fetch cùng với association `User` (username, avatar, role) & Pagination.
+  - [x] `createComment`: Gắn route authentication, chèn rate limit rải rác.
+  - [x] `updateComment`: Kiểm tra Authorization.
+  - [x] `deleteComment`: Soft delete.
+- [x] `src/routes/v1/commentRoutes.js` — mount với Express router.
+
+**Module: Features & Components (Frontend)**
+- [x] `src/hooks/useComments.js` — Hook quản lý state API CRUD (hay áp dụng TanStack React Query).
+- [x] `src/components/comments/CommentSection.jsx` — Component cha bao bọc danh sách comment.
+- [x] `src/components/comments/CommentForm.jsx` — Textarea submit (hiển thị lock "Đăng nhập" nếu !user).
+- [x] `src/components/comments/CommentItem.jsx` — Hiển thị name, time, content, button Reply.
+- [x] `src/components/comments/CommentList.jsx` — Flat list hoặc đệ quy 1 tầng hỗ trợ reply child comments.
+- [x] Nhúng `<CommentSection movieSlug={movie.slug} />` vào các trang:
+  - [x] `src/pages/MovieDetail.jsx`
+  - [x] `src/pages/MoviePlayerPage.jsx`
+
 ---
 
 ## Phase 5 — Sẵn Sàng Production (P1–P2) · Ngày 19–22
