@@ -441,19 +441,19 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 19 · Testing Suite
 
 **Module: Unit Tests (Vitest)**
-- [ ] Backend:
-  - [ ] `tests/unit/auth.test.js` — hash password, verify login
-  - [ ] `tests/unit/jwt.test.js` — tạo/xác minh/hết hạn
-  - [ ] `tests/unit/transformer.test.js` — chuyển đổi data kkphim
-  - [ ] Validators, Cache helpers
+- [x] Backend:
+  - [x] `tests/unit/auth.test.js` — hash password, verify login
+  - [x] `tests/unit/jwt.test.js` — tạo/xác minh/hết hạn
+  - [x] `tests/unit/transformer.test.js` — chuyển đổi data kkphim
+  - [x] Validators, Cache helpers
 - [ ] Frontend:
   - [ ] `MovieCard` render đúng
   - [ ] `Header` responsive + navigation
   - [ ] `ProtectedRoute` redirect logic
-  - [ ] `authStore` state transitions
+  - [x] `authStore` state transitions
 
 **Module: Integration Tests (Supertest)**
-- [ ] `tests/integration/auth.routes.test.js` — full auth flow
+- [x] `tests/integration/auth.routes.test.js` — full auth flow
 - [ ] `tests/integration/movie.routes.test.js` — proxy + cache + transform
 - [ ] `tests/integration/favorite.routes.test.js` — CRUD + auth
 
