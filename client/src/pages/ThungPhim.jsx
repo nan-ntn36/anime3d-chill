@@ -53,6 +53,10 @@ export default function ThungPhimPage() {
       <Helmet>
         <title>{activeCategory.label} — ThungPhim | Anime3D-Chill</title>
         <meta name="description" content={`Xem ${activeCategory.label}: phim bộ, phim lẻ, hoạt hình và nhiều thể loại khác tại Anime3D-Chill.`} />
+        <link rel="canonical" href={`${window.location.origin}/thung-phim`} />
+        <meta property="og:title" content={`${activeCategory.label} — ThungPhim | Anime3D-Chill`} />
+        <meta property="og:description" content={`Xem ${activeCategory.label}: phim bộ, phim lẻ, hoạt hình tại Anime3D-Chill.`} />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="thung-phim container">

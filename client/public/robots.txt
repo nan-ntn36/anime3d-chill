@@ -1,0 +1,15 @@
+# Anime3D-Chill
+# Website xem phim anime | https://anime3d-chill.vercel.app
+
+User-agent: *
+Allow: /
+Disallow: /ca-nhan
+Disallow: /dang-nhap
+Disallow: /dang-ky
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://anime3d-chill.vercel.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

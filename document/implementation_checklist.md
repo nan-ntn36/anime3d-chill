@@ -420,19 +420,19 @@ Thêm vào cuối mỗi ngày làm việc:
 ### Ngày 18 · SEO & Accessibility
 
 **Module: SEO**
-- [ ] `react-helmet-async` cho mỗi page: title, meta description, OG tags
-- [ ] `public/robots.txt` — allow search engines
-- [ ] `public/sitemap.xml` — danh sách URL chính
-- [ ] Semantic HTML: `<main>`, `<article>`, `<nav>`, `<section>`, `<h1>` mỗi trang
-- [ ] URL canonical, OG image từ poster phim
+- [x] `react-helmet-async` cho mỗi page: title, meta description, OG tags
+- [x] `public/robots.txt` — allow search engines
+- [x] `public/sitemap.xml` — danh sách URL chính
+- [x] Semantic HTML: `<main>`, `<article>`, `<nav>`, `<section>`, `<h1>` mỗi trang
+- [x] URL canonical, OG image từ poster phim
 
 **Module: Accessibility (A11y)**
-- [ ] Keyboard navigation: Tab, Enter/Space
-- [ ] `aria-label` cho player controls
-- [ ] Color contrast ≥ 4.5:1
-- [ ] Alt text cho poster images (dùng tên phim)
-- [ ] Focus visible outline
-- [ ] Skip-to-content link
+- [x] Keyboard navigation: Tab, Enter/Space
+- [x] `aria-label` cho player controls
+- [x] Color contrast ≥ 4.5:1
+- [x] Alt text cho poster images (dùng tên phim)
+- [x] Focus visible outline
+- [x] Skip-to-content link
 
 ---
 

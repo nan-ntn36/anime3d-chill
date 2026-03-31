@@ -63,7 +63,7 @@ export default function Header() {
         </Link>
 
         {/* Nav Links */}
-        <nav className={`header__nav ${isMobileOpen ? 'header__nav--open' : ''}`}>
+        <nav className={`header__nav ${isMobileOpen ? 'header__nav--open' : ''}`} aria-label="Điều hướng chính">
           <Link to="/" className="header__link" onClick={() => setIsMobileOpen(false)}>
             Trang Chủ
           </Link>
@@ -81,14 +81,15 @@ export default function Header() {
           </Link>
 
           {/* Search — mobile */}
-          <form className="header__search header__search--mobile" onSubmit={handleSearch}>
-            <FiSearch className="header__search-icon" />
+          <form className="header__search header__search--mobile" onSubmit={handleSearch} role="search" aria-label="Tìm kiếm phim">
+            <FiSearch className="header__search-icon" aria-hidden="true" />
             <input
               type="text"
               placeholder="Tìm phim..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="header__search-input"
+              aria-label="Nhập tên phim cần tìm"
             />
           </form>
         </nav>
@@ -96,14 +97,15 @@ export default function Header() {
         {/* Right section */}
         <div className="header__right">
           {/* Search — desktop */}
-          <form className="header__search header__search--desktop" onSubmit={handleSearch}>
-            <FiSearch className="header__search-icon" />
+          <form className="header__search header__search--desktop" onSubmit={handleSearch} role="search" aria-label="Tìm kiếm phim">
+            <FiSearch className="header__search-icon" aria-hidden="true" />
             <input
               type="text"
               placeholder="Tìm phim..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="header__search-input"
+              aria-label="Nhập tên phim cần tìm"
             />
           </form>
 

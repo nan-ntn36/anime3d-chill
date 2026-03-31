@@ -209,9 +209,12 @@ export default function MoviePlayerPage() {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDesc} />
+        <link rel="canonical" href={`${window.location.origin}/phim/${slug}/xem`} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDesc} />
+        <meta property="og:type" content="video.episode" />
         {movie.poster && <meta property="og:image" content={movie.poster} />}
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       <div className={`player-page ${isTheaterMode ? 'player-page--theater' : ''}`}>

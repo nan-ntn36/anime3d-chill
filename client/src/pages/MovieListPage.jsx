@@ -53,6 +53,10 @@ export default function MovieListPage() {
         <Helmet>
           <title>{pageTitle} Phim — Anime3D-Chill</title>
           <meta name="description" content={`Duyệt phim theo ${pageTitle.toLowerCase()} trên Anime3D-Chill`} />
+          <link rel="canonical" href={`${window.location.origin}${location.pathname}`} />
+          <meta property="og:title" content={`${pageTitle} Phim — Anime3D-Chill`} />
+          <meta property="og:description" content={`Duyệt phim theo ${pageTitle.toLowerCase()} trên Anime3D-Chill`} />
+          <meta property="og:type" content="website" />
         </Helmet>
 
         <div className="movie-list-page container">
@@ -107,6 +111,10 @@ export default function MovieListPage() {
       <Helmet>
         <title>{label} — {pageTitle} | Anime3D-Chill</title>
         <meta name="description" content={`Xem phim ${pageTitle.toLowerCase()} ${label} trên Anime3D-Chill`} />
+        <link rel="canonical" href={`${window.location.origin}${location.pathname}`} />
+        <meta property="og:title" content={`${label} — ${pageTitle} | Anime3D-Chill`} />
+        <meta property="og:description" content={`Xem phim ${pageTitle.toLowerCase()} ${label} trên Anime3D-Chill`} />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="movie-list-page container">

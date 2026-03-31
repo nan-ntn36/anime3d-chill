@@ -44,7 +44,7 @@ html {
   /* Text */
   --color-text-primary: #e8e8f0;
   --color-text-secondary: #a0a0b8;
-  --color-text-muted: #6c6c85;
+  --color-text-muted: #8e8ea8; /* WCAG 4.5:1 on #000 bg */
   --color-text-inverse: #0a0a0f;
 
   /* Border */
@@ -143,13 +143,45 @@ button {
   font-family: inherit;
   cursor: pointer;
   border: none;
-  outline: none;
 }
 
 input, textarea, select {
   font-family: inherit;
   font-size: inherit;
+}
+
+/* ── Focus Visible — A11y Day 18 ───────────────────────── */
+/* Only show focus ring for keyboard navigation, not mouse clicks */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Remove focus ring for mouse clicks */
+:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Interactive elements — enhanced focus ring */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Cards & movie cards — glow focus */
+.card:focus-visible,
+.movie-card-container:focus-visible,
+.ranking-card:focus-visible,
+.trending-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-accent-light);
 }
 
 ul, ol {

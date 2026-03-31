@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Trang chủ -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Phim Mới -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/phim-moi</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Thùng Phim -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/thung-phim</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Tìm Kiếm -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/tim-kiem</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Thể Loại -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/the-loai</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Quốc Gia -->
+  <url>
+    <loc>https://anime3d-chill.vercel.app/quoc-gia</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

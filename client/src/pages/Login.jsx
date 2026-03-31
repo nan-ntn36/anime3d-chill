@@ -53,6 +53,9 @@ export default function Login() {
     <>
       <Helmet>
         <title>{isLoginView ? 'Đăng nhập' : 'Đăng ký'} — Anime3D-Chill</title>
+        <meta name="description" content={isLoginView ? 'Đăng nhập vào Anime3D-Chill để xem phim yêu thích.' : 'Tạo tài khoản Anime3D-Chill miễn phí.'} />
+        <meta name="robots" content="noindex, nofollow" />
+        <link rel="canonical" href={`${window.location.origin}/dang-nhap`} />
       </Helmet>
 
       <div className="auth-page">

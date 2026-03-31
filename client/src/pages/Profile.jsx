@@ -124,6 +124,8 @@ export default function Profile() {
     <>
       <Helmet>
         <title>{`Trang cá nhân — ${user?.username || 'Bạn'} | Anime3D-Chill`}</title>
+        <meta name="description" content="Quản lý tài khoản, lịch sử xem phim và phim yêu thích." />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="profile-page container">

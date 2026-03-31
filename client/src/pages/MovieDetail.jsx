@@ -170,6 +170,8 @@ export default function MovieDetail() {
         {seoImage && <meta property="og:image" content={seoImage} />}
         <meta property="og:type" content="video.movie" />
         <link rel="canonical" href={`${window.location.origin}/phim/${slug}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        {seoImage && <meta name="twitter:image" content={seoImage} />}
       </Helmet>
 
       <article className="movie-detail">

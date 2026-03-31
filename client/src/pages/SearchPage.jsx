@@ -66,6 +66,9 @@ export default function SearchPage() {
       <Helmet>
         <title>{hasKeyword ? `"${debouncedKeyword}" — Tìm Kiếm | Anime3D-Chill` : 'Tìm Kiếm Phim | Anime3D-Chill'}</title>
         <meta name="description" content={`Tìm kiếm phim anime, phim bộ, phim lẻ trên Anime3D-Chill${hasKeyword ? `: ${debouncedKeyword}` : ''}`} />
+        <link rel="canonical" href={`${window.location.origin}/tim-kiem`} />
+        <meta property="og:title" content={hasKeyword ? `"${debouncedKeyword}" — Tìm Kiếm | Anime3D-Chill` : 'Tìm Kiếm Phim | Anime3D-Chill'} />
+        <meta property="og:type" content="website" />
       </Helmet>
 
       <div className="search-page container">

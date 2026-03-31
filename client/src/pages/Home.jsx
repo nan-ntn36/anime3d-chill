@@ -25,8 +25,14 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>Anime3D-Chill — Xem Phim Anime Online</title>
-        <meta name="description" content="Xem phim anime miễn phí với giao diện hiện đại. Cập nhật phim mới mỗi ngày." />
+        <title>Anime3D-Chill — Xem Phim Anime Online Miễn Phí</title>
+        <meta name="description" content="Xem phim anime miễn phí với giao diện hiện đại. Cập nhật phim mới mỗi ngày. Phim bộ, phim lẻ, hoạt hình chất lượng cao." />
+        <link rel="canonical" href={`${window.location.origin}/`} />
+        <meta property="og:title" content="Anime3D-Chill — Xem Phim Anime Online Miễn Phí" />
+        <meta property="og:description" content="Xem phim anime miễn phí với giao diện hiện đại. Cập nhật phim mới mỗi ngày." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${window.location.origin}/`} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       {/* Hero Banner */}
