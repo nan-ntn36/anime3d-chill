@@ -10,13 +10,13 @@ import './GenreCards.css';
 const MAX_DISPLAY = 5;
 
 export default function GenreCards() {
-  const { data: genres = [], isLoading } = useGenres();
+  const { data: genres = [], isLoading, isFetching } = useGenres();
 
   // Hiển thị tối đa 5 thể loại + 1 card "xem thêm"
   const displayGenres = genres.slice(0, MAX_DISPLAY);
   const remaining = genres.length - MAX_DISPLAY;
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <section className="genre-cards container">
         <h2 className="genre-cards__title">Bạn đang quan tâm gì?</h2>

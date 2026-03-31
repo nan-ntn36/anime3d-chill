@@ -20,11 +20,11 @@ function formatViews(count) {
 }
 
 export default function TrendingSection() {
-  const { data, isLoading, isError } = useTrendingMovies();
+  const { data, isLoading, isFetching, isError } = useTrendingMovies();
   const movies = data?.items || [];
 
-  // Không hiển thị nếu không có data
-  if (isError || (!isLoading && movies.length === 0)) return null;
+  // Không hiển thị nếu không có data (và không đang fetch)
+  if (isError || (!isLoading && !isFetching && movies.length === 0)) return null;
 
   return (
     <section className="trending-section" id="trending-section">
@@ -41,7 +41,7 @@ export default function TrendingSection() {
         </div>
 
         {/* Grid */}
-        {isLoading ? (
+        {(isLoading || isFetching) ? (
           <div className="trending-section__grid">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="trending-card trending-card--skeleton">

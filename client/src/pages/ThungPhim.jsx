@@ -2,22 +2,14 @@
  * ThungPhimPage — Kho phim: tabs theo loại (Tất Cả, Phim Bộ, Phim Lẻ, Hoạt Hình, TV Shows)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import MovieCard from '@components/movie/MovieCard';
 import Pagination from '@components/ui/Pagination';
 import ErrorFallback from '@components/common/ErrorFallback';
-import { useAllMovies, useMoviesByList } from '@/hooks/useMovies';
+import { useAllMovies, useMoviesByGenre, useGenres } from '@/hooks/useMovies';
 import './ThungPhim.css';
-
-const CATEGORIES = [
-  { slug: 'all',       label: 'Tất Cả',    icon: '🎬' },
-  { slug: 'phim-bo',   label: 'Phim Bộ',    icon: '📺' },
-  { slug: 'phim-le',   label: 'Phim Lẻ',    icon: '🎥' },
-  { slug: 'hoat-hinh', label: 'Hoạt Hình',  icon: '🎨' },
-  { slug: 'tv-shows',  label: 'TV Shows',   icon: '📡' },
-];
 
 export default function ThungPhimPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,14 +17,51 @@ export default function ThungPhimPage() {
   const activeSlug = searchParams.get('loai') || 'all';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
-  const activeCategory = CATEGORIES.find(c => c.slug === activeSlug) || CATEGORIES[0];
+  // Lấy dữ liệu 10 genres từ API (backend cache)
+  const { data: genresData, isLoading: genresLoading, isError: genresError } = useGenres();
 
-  // Fetch data dựa trên tab đang chọn
-  const allMovies = useAllMovies(activeSlug === 'all' ? page : 1);
-  const listMovies = useMoviesByList(activeSlug !== 'all' ? activeSlug : null, page);
+  // Tạo mảng Tabs động
+  const CATEGORIES = useMemo(() => {
+    const baseCat = { slug: 'all', label: 'Tất Cả', icon: '🎬', type: 'all' };
+    
+    // Đang tải hoặc lỗi API -> Tạm thời chỉ hiện 1 tab báo hiệu
+    if (genresLoading) {
+      return [baseCat, { slug: 'loading', label: 'Đang tải thể loại...', icon: '🔄', type: 'loading' }];
+    }
+    
+    if (genresError || !genresData || !Array.isArray(genresData)) {
+      return [baseCat, { slug: 'error', label: 'Lỗi tải Thể loại (API)', icon: '⚠️', type: 'error' }];
+    }
+    
+    // Ánh xạ 10 thể loại đầu tiên từ API
+    const ICONS = ['🔥', '🗺️', '👻', '😂', '🚀', '💖', '⚽', '🏫', '🥋'];
+    const apiGenres = genresData.slice(0, 9).map((g, index) => ({
+      slug: g.slug || g._id,  
+      label: g.name,
+      icon: ICONS[index] || '✨',
+      type: 'genre'
+    }));
 
-  const query = activeSlug === 'all' ? allMovies : listMovies;
-  const { data, isLoading, isError, refetch } = query;
+    return [baseCat, ...apiGenres];
+  }, [genresData, genresLoading, genresError]);
+
+  // Luôn đảm bảo lấy nhãn chuẩn nếu tab đang tải
+  const activeLabel = CATEGORIES.find(c => c.slug === activeSlug)?.label || (activeSlug === 'all' ? 'Tất Cả' : 'Đang Tải...');
+  const activeIcon = CATEGORIES.find(c => c.slug === activeSlug)?.icon || '✨';
+
+  // Xác định định tuyến fetch: 
+  // - Nếu tab là "all", dùng useAllMovies. 
+  // - Còn lại đều coi như "genre"
+  const activeType = activeSlug === 'all' ? 'all' : 'genre';
+
+  const allMovies = useAllMovies(activeType === 'all' ? page : 1);
+  const genreMovies = useMoviesByGenre(activeType === 'genre' ? activeSlug : null, page);
+
+  const query = activeType === 'all' ? allMovies : genreMovies;
+  const { data, isLoading, isFetching, isError, refetch } = query;
+
+  // Hiển thị loader ngay cả khi đang refresh dữ liệu (tránh web đơ vì API bên thứ 3 chậm)
+  const isDataLoading = isLoading || isFetching;
 
   const movies = data?.items || [];
   const pagination = data?.pagination || {};
@@ -51,11 +80,11 @@ export default function ThungPhimPage() {
   return (
     <>
       <Helmet>
-        <title>{activeCategory.label} — ThungPhim | Anime3D-Chill</title>
-        <meta name="description" content={`Xem ${activeCategory.label}: phim bộ, phim lẻ, hoạt hình và nhiều thể loại khác tại Anime3D-Chill.`} />
+        <title>{activeLabel} — ThungPhim | Anime3D-Chill</title>
+        <meta name="description" content={`Xem ${activeLabel}: phim bộ, phim lẻ, hoạt hình và nhiều thể loại khác tại Anime3D-Chill.`} />
         <link rel="canonical" href={`${window.location.origin}/thung-phim`} />
-        <meta property="og:title" content={`${activeCategory.label} — ThungPhim | Anime3D-Chill`} />
-        <meta property="og:description" content={`Xem ${activeCategory.label}: phim bộ, phim lẻ, hoạt hình tại Anime3D-Chill.`} />
+        <meta property="og:title" content={`${activeLabel} — ThungPhim | Anime3D-Chill`} />
+        <meta property="og:description" content={`Xem ${activeLabel}: phim bộ, phim lẻ, hoạt hình tại Anime3D-Chill.`} />
         <meta property="og:type" content="website" />
       </Helmet>
 
@@ -92,7 +121,7 @@ export default function ThungPhimPage() {
               message="Không thể tải danh sách phim"
               onRetry={() => refetch()}
             />
-          ) : isLoading ? (
+          ) : isDataLoading ? (
             <div className="thung-phim__grid">
               {Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="skeleton" style={{ aspectRatio: '2/3', borderRadius: 'var(--radius-lg)' }} />
@@ -107,7 +136,7 @@ export default function ThungPhimPage() {
             <>
               {/* Movie Count */}
               <p className="thung-phim__count">
-                {activeCategory.icon} {activeCategory.label} — Trang {page}/{totalPages}
+                {activeIcon} {activeLabel} — Trang {page}/{totalPages}
                 {pagination.totalItems && ` · ${pagination.totalItems.toLocaleString()} phim`}
               </p>
 

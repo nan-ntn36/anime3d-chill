@@ -38,7 +38,7 @@ export default function Home() {
       {/* Hero Banner */}
       <HeroBanner
         movies={movies}
-        loading={newMovies.isLoading}
+        loading={newMovies.isLoading || newMovies.isFetching}
       />
 
       {/* Trending Section — Phim Thịnh Hành */}
@@ -64,10 +64,10 @@ export default function Home() {
 
               {newMovies.isError ? (
                 <ErrorFallback
-                  message="Không thể tải phim hoạt hình"
+                  message="Không thể tải phim mới"
                   onRetry={() => newMovies.refetch()}
                 />
-              ) : newMovies.isLoading ? (
+              ) : (newMovies.isLoading || newMovies.isFetching) ? (
                 <div className="home__grid">
                   {Array.from({ length: 10 }).map((_, i) => (
                     <div key={i} className="movie-card-container">
@@ -102,7 +102,7 @@ export default function Home() {
                   title="Hoạt Hình"
                   icon="🎨"
                   movies={hoatHinh.data?.items || []}
-                  loading={hoatHinh.isLoading}
+                  loading={hoatHinh.isLoading || hoatHinh.isFetching}
                   viewAllLink="/danh-sach/hoat-hinh"
                 />
               )}

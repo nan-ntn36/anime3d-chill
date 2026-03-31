@@ -45,7 +45,8 @@ export default function SearchPage() {
   }, [debouncedKeyword, page, setSearchParams]);
 
   // Query
-  const { data, isLoading, isError, refetch } = useSearchMovies(debouncedKeyword, page);
+  const { data, isLoading, isFetching, isError, refetch } = useSearchMovies(debouncedKeyword, page);
+  const isDataLoading = isLoading || isFetching;
 
   const movies = data?.items || [];
   const pagination = data?.pagination || {};
@@ -53,7 +54,7 @@ export default function SearchPage() {
   const totalItems = pagination.totalItems || 0;
 
   const hasKeyword = debouncedKeyword.length > 1;
-  const isEmpty = hasKeyword && !isLoading && !isError && movies.length === 0;
+  const isEmpty = hasKeyword && !isDataLoading && !isError && movies.length === 0;
 
   const handleClear = () => {
     setInputValue('');
@@ -118,7 +119,7 @@ export default function SearchPage() {
                 message="Không thể tìm kiếm. Hãy thử lại!"
                 onRetry={() => refetch()}
               />
-            ) : isLoading ? (
+            ) : isDataLoading ? (
               <div className="search-page__grid">
                 {Array.from({ length: 10 }).map((_, i) => (
                   <div key={i} className="movie-card-container">

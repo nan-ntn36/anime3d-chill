@@ -17,26 +17,26 @@ export default function Profile() {
 
   // History Pagination
   const [historyPage, setHistoryPage] = useState(1);
-  const { data: historyData, isLoading: historyLoading } = useQuery({
+  const { data: historyData, isLoading: historyLoading, isFetching: historyFetching } = useQuery({
     queryKey: ['me', 'history', historyPage],
     queryFn: async () => {
       const { data } = await userApi.getHistory(historyPage);
       return data;
     },
     enabled: activeTab === 'history',
-    keepPreviousData: true
+    placeholderData: (prev) => prev,
   });
 
   // Favorites Pagination
   const [favPage, setFavPage] = useState(1);
-  const { data: favData, isLoading: favLoading } = useQuery({
+  const { data: favData, isLoading: favLoading, isFetching: favFetching } = useQuery({
     queryKey: ['me', 'favorites', favPage],
     queryFn: async () => {
       const { data } = await userApi.getFavorites(favPage);
       return data;
     },
     enabled: activeTab === 'favorites',
-    keepPreviousData: true
+    placeholderData: (prev) => prev,
   });
 
   const handleLogout = async () => {
@@ -183,7 +183,7 @@ export default function Profile() {
               
               <MovieGrid 
                 movies={historyData?.data?.map(mapToMovie) || []} 
-                loading={historyLoading} 
+                loading={historyLoading || historyFetching} 
                 columns={4}
               />
               
@@ -204,7 +204,7 @@ export default function Profile() {
               
               <MovieGrid 
                 movies={favData?.data?.map(mapToMovie) || []} 
-                loading={favLoading} 
+                loading={favLoading || favFetching} 
                 columns={4}
               />
 

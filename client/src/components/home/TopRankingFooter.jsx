@@ -13,7 +13,7 @@ const GENRE_TAGS = [
 ];
 
 export default function TopRankingFooter() {
-  const { data } = useNewMovies(1);
+  const { data, isLoading: moviesLoading } = useNewMovies(1);
   const recentComments = useRecentComments(4); // fetch 4 comments mới nhất
   
   const hotMovies = data?.items?.slice(0, 5) || [];
@@ -29,18 +29,30 @@ export default function TopRankingFooter() {
               <span className="top-footer__icon">🔥</span> ĐANG HOT
             </h3>
             <div className="top-footer__cards">
-              {hotMovies.map((m, i) => (
-                <Link to={`/phim/${m.slug}`} key={m.slug} className="ranking-mini-card">
-                  <span className={`ranking-mini-card__rank ${i < 3 ? `rank-${i + 1}` : ''}`}>{i + 1}</span>
-                  <div className="ranking-mini-card__thumb">
-                    <img src={m.poster || m.thumb} alt={m.title} referrerPolicy="no-referrer" />
+              {moviesLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="ranking-mini-card">
+                    <div className="skeleton" style={{ width: 50, height: 60, borderRadius: 'var(--radius-sm)' }} />
+                    <div className="ranking-mini-card__info" style={{ flex: 1 }}>
+                      <div className="skeleton" style={{ height: 16, width: '80%', marginBottom: 8 }} />
+                      <div className="skeleton" style={{ height: 12, width: '40%' }} />
+                    </div>
                   </div>
-                  <div className="ranking-mini-card__info">
-                    <span className="ranking-mini-card__name">{m.title}</span>
-                    <span className="ranking-mini-card__meta">{m.year} • {m.quality || 'FHD'}</span>
-                  </div>
-                </Link>
-              ))}
+                ))
+              ) : (
+                hotMovies.map((m, i) => (
+                  <Link to={`/phim/${m.slug}`} key={m.slug} className="ranking-mini-card">
+                    <span className={`ranking-mini-card__rank ${i < 3 ? `rank-${i + 1}` : ''}`}>{i + 1}</span>
+                    <div className="ranking-mini-card__thumb">
+                      <img src={m.poster || m.thumb} alt={m.title} referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="ranking-mini-card__info">
+                      <span className="ranking-mini-card__name">{m.title}</span>
+                      <span className="ranking-mini-card__meta">{m.year} • {m.quality || 'FHD'}</span>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
 
@@ -50,18 +62,30 @@ export default function TopRankingFooter() {
               <span className="top-footer__icon"><FiStar /></span> TOP ĐÁNH GIÁ
             </h3>
             <div className="top-footer__cards">
-              {topMovies.map((m, i) => (
-                <Link to={`/phim/${m.slug}`} key={m.slug} className="ranking-mini-card">
-                  <span className={`ranking-mini-card__rank ${i < 3 ? `rank-${i + 1}` : ''}`}>{i + 1}</span>
-                  <div className="ranking-mini-card__thumb">
-                    <img src={m.poster || m.thumb} alt={m.title} referrerPolicy="no-referrer" />
+              {moviesLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="ranking-mini-card">
+                    <div className="skeleton" style={{ width: 50, height: 60, borderRadius: 'var(--radius-sm)' }} />
+                    <div className="ranking-mini-card__info" style={{ flex: 1 }}>
+                      <div className="skeleton" style={{ height: 16, width: '80%', marginBottom: 8 }} />
+                      <div className="skeleton" style={{ height: 12, width: '40%' }} />
+                    </div>
                   </div>
-                  <div className="ranking-mini-card__info">
-                    <span className="ranking-mini-card__name">{m.title}</span>
-                    <span className="ranking-mini-card__meta">{m.year} • {m.quality || 'FHD'}</span>
-                  </div>
-                </Link>
-              ))}
+                ))
+              ) : (
+                topMovies.map((m, i) => (
+                  <Link to={`/phim/${m.slug}`} key={m.slug} className="ranking-mini-card">
+                    <span className={`ranking-mini-card__rank ${i < 3 ? `rank-${i + 1}` : ''}`}>{i + 1}</span>
+                    <div className="ranking-mini-card__thumb">
+                      <img src={m.poster || m.thumb} alt={m.title} referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="ranking-mini-card__info">
+                      <span className="ranking-mini-card__name">{m.title}</span>
+                      <span className="ranking-mini-card__meta">{m.year} • {m.quality || 'FHD'}</span>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
           </div>
 
@@ -89,7 +113,15 @@ export default function TopRankingFooter() {
             </h3>
             <div className="top-footer__cards">
               {recentComments.isLoading ? (
-                <div style={{ color: 'var(--color-text-muted)' }}>Đang tải bình luận...</div>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="comment-mini-card">
+                    <div className="skeleton" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                    <div className="comment-mini-card__body" style={{ flex: 1 }}>
+                      <div className="skeleton" style={{ height: 12, width: '40%', marginBottom: 6 }} />
+                      <div className="skeleton" style={{ height: 14, width: '90%' }} />
+                    </div>
+                  </div>
+                ))
               ) : recentComments.data?.length > 0 ? (
                 recentComments.data.map((c) => {
                   // Tính thời gian relative (vừa xong, x giờ trước)

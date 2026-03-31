@@ -72,7 +72,7 @@ export default function MovieListPage() {
             </p>
           </div>
 
-          {topicsQuery.isLoading ? (
+          {topicsQuery.isLoading || topicsQuery.isFetching ? (
             <div className="movie-list-page__topic-grid">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="topic-card skeleton" style={{ minHeight: '160px' }} />
@@ -130,7 +130,7 @@ export default function MovieListPage() {
             message={`Không thể tải phim ${pageTitle.toLowerCase()} "${label}"`}
             onRetry={() => query.refetch()}
           />
-        ) : query.isLoading ? (
+        ) : (query.isLoading || query.isFetching) ? (
           <div className="movie-list-page__grid">
             {Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="movie-card-container">
