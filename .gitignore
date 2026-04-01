@@ -43,3 +43,6 @@ temp/
 _agents/
 _agent/
 .env.production
+
+# Personal documentation (not for repo)
+document/
