@@ -486,8 +486,8 @@ Mở trình duyệt:
 
 | Service | URL |
 |---------|-----|
-| 🌐 **Website** | `http://IP_VPS_CUA_BAN` |
-| 🔧 **Admin** | `http://IP_VPS_CUA_BAN:3001` |
+| 🌐 **Website** | `http://IP_VPS_CUA_BAN:85` |
+| 🔧 **Admin** | `http://IP_VPS_CUA_BAN:86` |
 | 💚 **API** | `http://IP_VPS_CUA_BAN/api/v1/health` |
 
 ✅ Thấy trang web → **Deploy thành công!** 🎉
